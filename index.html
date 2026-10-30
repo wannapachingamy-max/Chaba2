@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chaba Shortcake 🍓</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        blush: '#FFDBDB',       
+                        precious: '#FDC3D1',    
+                        peach: '#FDA8BF',       
+                        thimble: '#FB8CAC',     
+                        strawberry: '#FF5C89',  
+                        arcavia: '#D13869',     
+                        babyblue: '#CDE4FE',    
+                        lavender: '#E8DFF5',    
+                        lemon: '#FEF0D4',
+                        line: '#00D13B',        
+                    },
+                    boxShadow: {
+                        'cute': '0 8px 25px rgba(253, 195, 209, 0.6)',
+                        'cute-sm': '0 4px 15px rgba(253, 195, 209, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #FFF5F7; color: #D13869; margin: 0; overflow-x: hidden; }
+        .floating-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -2; background: linear-gradient(135deg, #FFF5F7 0%, #FFDBDB 30%, #E8DFF5 60%, #CDE4FE 100%); overflow: hidden; }
+        .frosted-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; backdrop-filter: blur(4px); background: rgba(255, 245, 247, 0.3); pointer-events: none; z-index: -1; }
+
+        .bouncing-ball { position: fixed; border-radius: 50%; pointer-events: none; z-index: -1; opacity: 0.45; filter: blur(2px); }
+        .ball-1 { width: 90px; height: 90px; background: #FF5C89; animation: bounce1 14s infinite alternate ease-in-out; }
+        .ball-2 { width: 120px; height: 120px; background: #CDE4FE; animation: bounce2 18s infinite alternate ease-in-out; }
+        .ball-3 { width: 70px; height: 70px; background: #E8DFF5; animation: bounce3 12s infinite alternate ease-in-out; }
+        .ball-4 { width: 100px; height: 100px; background: #FEF0D4; animation: bounce4 16s infinite alternate ease-in-out; }
+
+        @keyframes bounce1 { 0% { top: 10%; left: 5%; } 50% { top: 75% ; left: 80%; } 100% { top: 40%; left: 90%; } }
+        @keyframes bounce2 { 0% { top: 60%; left: 80%; } 50% { top: 15%; left: 20%; } 100% { top: 80%; left: 10%; } }
+        @keyframes bounce3 { 0% { top: 30%; left: 40%; } 50% { top: 80%; left: 60%; } 100% { top: 5%; left: 50%; } }
+        @keyframes bounce4 { 0% { top: 80%; left: 30%; } 50% { top: 20%; left: 70%; } 100% { top: 60%; left: 20%; } }
+
+        .cloud { position: absolute; opacity: 0.7; z-index: -2; filter: drop-shadow(0 10px 16px rgba(255, 255, 255, 0.6)); }
+        .c-1 { top: 8%; left: -40%; width: 220px; animation: drift 30s linear infinite; }
+        .c-2 { top: 35%; left: -40%; width: 180px; animation: drift 40s linear infinite 8s; }
+        .c-3 { top: 60%; left: -40%; width: 260px; animation: drift 35s linear infinite 15s; }
+        .c-4 { top: 85%; left: -40%; width: 200px; animation: drift 45s linear infinite 4s; }
+
+        @keyframes drift { 0% { transform: translateX(0) translateY(0); } 33% { transform: translateX(60vw) translateY(-15px); } 66% { transform: translateX(110vw) translateY(15px); } 100% { transform: translateX(160vw) translateY(0); } }
+
+        .text-outline-white { text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff, 0px -2px 0 #fff, 0px 2px 0 #fff, -2px 0px 0 #fff, 2px 0px 0 #fff; }
+
+        .kawaii-panel { position: relative; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-radius: 36px; border: 12px solid #FFDBDB; padding: 28px 24px; box-shadow: 0 10px 30px rgba(253, 195, 209, 0.5); margin-top: 1.5rem; margin-bottom: 1.5rem; z-index: 10; width: 100%; box-sizing: border-box; overflow: visible !important; }
+        .kawaii-panel::after { content: ""; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px; border-radius: 20px; border: 3px dashed #FDA8BF; pointer-events: none; z-index: 1; }
+        
+        .panel-blue { border-color: #CDE4FE; box-shadow: 0 10px 30px rgba(205, 228, 254, 0.5); }
+        .panel-blue::after { border-color: #A6CFFD; }
+        .panel-purple { border-color: #E8DFF5; box-shadow: 0 10px 30px rgba(232, 223, 245, 0.5); }
+        .panel-purple::after { border-color: #D3C4ED; }
+
+        .k-bow { position: absolute; top: -35px; left: -30px; font-size: 4rem; z-index: 50; transform: rotate(-15deg); filter: drop-shadow(2px 4px 4px rgba(253,195,209,0.8)); pointer-events: none; user-select: none; }
+        .k-heart { position: absolute; top: -25px; right: -25px; font-size: 3rem; z-index: 50; transform: rotate(15deg); filter: drop-shadow(2px 4px 4px rgba(253,195,209,0.8)); pointer-events: none; user-select: none; }
+        .k-star { position: absolute; bottom: -25px; left: -25px; font-size: 3rem; z-index: 50; transform: rotate(-10deg); filter: drop-shadow(2px 4px 4px rgba(253,195,209,0.8)); pointer-events: none; user-select: none; }
+        .k-sparkle { position: absolute; bottom: -20px; right: -20px; font-size: 3rem; z-index: 50; transform: rotate(15deg); filter: drop-shadow(2px 4px 4px rgba(205,228,254,0.8)); pointer-events: none; user-select: none; }
+        .k-tulip-left { position: absolute; bottom: -20px; left: -20px; font-size: 3.5rem; z-index: 50; transform: rotate(-15deg); filter: drop-shadow(2px 4px 4px rgba(253,195,209,0.8)); pointer-events: none; user-select: none; }
+        .k-tulip-right { position: absolute; bottom: -20px; right: -20px; font-size: 3.5rem; z-index: 50; transform: rotate(15deg) scaleX(-1); filter: drop-shadow(-2px 4px 4px rgba(253,195,209,0.8)); pointer-events: none; user-select: none; }
+        .k-cloud-left { position: absolute; top: -15px; left: -10px; font-size: 3.5rem; z-index: 50; filter: drop-shadow(2px 4px 4px rgba(255,255,255,0.9)); pointer-events: none; user-select: none; opacity: 0.9; }
+        .k-cloud-right { position: absolute; top: -10px; right: -15px; font-size: 4rem; z-index: 50; filter: drop-shadow(2px 4px 4px rgba(255,255,255,0.9)); pointer-events: none; user-select: none; opacity: 0.8; }
+
+        .max-w-container { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+        @media (min-width: 768px) { .max-w-container { max-width: 680px; } }
+
+        button, .interactive-btn, a.interactive-btn { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important; cursor: pointer; }
+        button:hover:not(:disabled), .interactive-btn:hover:not(:disabled) { transform: translateY(-4px) scale(1.04); filter: brightness(1.08); box-shadow: 0 10px 20px rgba(255, 92, 137, 0.3); }
+        button:active:not(:disabled), .interactive-btn:active:not(:disabled) { transform: translateY(2px) scale(0.96); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        @keyframes glowing-light { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 92, 137, 0.8); } 70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(255, 92, 137, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 92, 137, 0); } }
+        @keyframes glowing-green { 0% { box-shadow: 0 0 0 0 rgba(0, 209, 59, 0.8); } 70% { box-shadow: 0 0 0 14px rgba(0, 209, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 209, 59, 0); } }
+
+        .pulse-glow { animation: glowing-light 2s infinite; }
+        .pulse-green { animation: glowing-green 2s infinite; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FFDBDB; }
+        ::-webkit-scrollbar-thumb { background: #FDA8BF; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF5C89; }
+        
+        .star-rating i { cursor: pointer; color: #FFDBDB; transition: color 0.2s, transform 0.2s; }
+        .star-rating i.active { color: #FF5C89; } 
+        .star-rating i:hover { transform: scale(1.2); }
+        
+        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(5deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-float-delay { animation: float 3.5s ease-in-out infinite 1s; }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .dot-live { background-color: #FF5C89; animation: glowing-light 1.5s infinite; }
+        .dot-wait { background-color: #fbbf24; }
+        .dot-completed { background-color: #22c55e; }
+        .dot-issue { background-color: #ef4444; animation: glowing-light 0.8s infinite; }
+
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .item-card { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+        .item-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 14px 28px rgba(253, 195, 209, 0.7); }
+
+        @keyframes reviewSlide { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
+        .review-carousel-container { overflow: hidden; position: relative; max-height: 280px; }
+        .review-carousel-track { display: flex; flex-direction: column; gap: 12px; animation: reviewSlide 16s linear infinite; }
+        .review-carousel-container:hover .review-carousel-track { animation-play-state: paused; }
+
+        .floating-line { position: fixed; bottom: 20px; right: 20px; z-index: 40; }
+        
+        .category-subtitle { background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border: 2px solid #FFDBDB; color: #D13869; padding: 12px 18px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; box-shadow: 0 6px 20px rgba(253, 195, 209, 0.5); line-height: 1.6; position: relative; z-index: 10; }
+        .pkg-card { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); cursor: pointer; }
+        .pkg-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 92, 137, 0.25); }
+        .order-card-detail { background: rgba(255,255,255,0.7); border: 1px dashed #FDA8BF; border-radius: 12px; padding: 8px 12px; margin-top: 8px; }
+    </style>
+</head>
+<body class="min-h-screen relative pb-20 md:pb-0">
+
+    <div class="floating-bg">
+        <div class="cloud c-1"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 17.5C4.01472 17.5 2 15.4853 2 13C2 10.7418 3.66649 8.87184 5.82869 8.5448C6.39803 5.40552 9.15573 3 12.5 3C16.366 3 19.5 6.13401 19.5 10C19.5 10.0381 19.4997 10.076 19.499 10.1137C21.4939 10.551 23 12.3575 23 14.5C23 16.9853 20.9853 19 18.5 19H6.5Z"/></svg></div>
+        <div class="cloud c-2"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 17.5C4.01472 17.5 2 15.4853 2 13C2 10.7418 3.66649 8.87184 5.82869 8.5448C6.39803 5.40552 9.15573 3 12.5 3C16.366 3 19.5 6.13401 19.5 10C19.5 10.0381 19.4997 10.076 19.499 10.1137C21.4939 10.551 23 12.3575 23 14.5C23 16.9853 20.9853 19 18.5 19H6.5Z"/></svg></div>
+        <div class="cloud c-3"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 17.5C4.01472 17.5 2 15.4853 2 13C2 10.7418 3.66649 8.87184 5.82869 8.5448C6.39803 5.40552 9.15573 3 12.5 3C16.366 3 19.5 6.13401 19.5 10C19.5 10.0381 19.4997 10.076 19.499 10.1137C21.4939 10.551 23 12.3575 23 14.5C23 16.9853 20.9853 19 18.5 19H6.5Z"/></svg></div>
+        <div class="cloud c-4"><svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6.5 17.5C4.01472 17.5 2 15.4853 2 13C2 10.7418 3.66649 8.87184 5.82869 8.5448C6.39803 5.40552 9.15573 3 12.5 3C16.366 3 19.5 6.13401 19.5 10C19.5 10.0381 19.4997 10.076 19.499 10.1137C21.4939 10.551 23 12.3575 23 14.5C23 16.9853 20.9853 19 18.5 19H6.5Z"/></svg></div>
+
+        <div class="bouncing-ball ball-1"></div>
+        <div class="bouncing-ball ball-2"></div>
+        <div class="bouncing-ball ball-3"></div>
+        <div class="bouncing-ball ball-4"></div>
+    </div>
+    <div class="frosted-overlay"></div>
+
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="custom-modal" class="fixed inset-0 bg-arcavia/30 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] p-6 w-full max-w-sm shadow-cute transform scale-95 transition-all duration-200 border-4 border-blush" id="modal-content">
+            <div class="text-center mb-4">
+                <div id="modal-icon" class="text-5xl mb-3 animate-float"></div>
+                <h3 id="modal-title" class="text-xl font-bold text-strawberry"></h3>
+                <div id="modal-message" class="text-thimble mt-2 text-sm whitespace-pre-line font-medium"></div>
+            </div>
+            <div class="flex gap-2 justify-center mt-6" id="modal-actions">
+                <button onclick="closeModal()" class="px-6 py-2.5 bg-blush rounded-full text-strawberry font-bold hover:bg-precious hover:text-white transition-colors shadow-sm w-full">เข้าใจแล้วค่า</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b-2 border-precious shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <button onclick="goBack()" id="btn-nav-back" class="hidden text-strawberry hover:bg-blush transition-all flex items-center gap-1 font-bold bg-white border border-precious px-3 py-1.5 rounded-full shadow-sm text-sm">
+                    <i class="fa-solid fa-chevron-left text-xs"></i> ย้อนกลับ
+                </button>
+                <div class="flex items-center gap-2 cursor-pointer" onclick="navigateMain('view-storefront')" id="nav-brand-title">
+                    <div class="w-8 h-8 bg-blush rounded-full border border-strawberry flex items-center justify-center text-lg animate-float-delay shadow-sm">🍓</div>
+                    <h1 class="font-bold text-xl text-arcavia tracking-wide hidden sm:block">ยัยชบา</h1>
+                </div>
+            </div>
+            <div class="flex gap-1 sm:gap-2 bg-blush/40 p-1 rounded-full border border-blush overflow-x-auto no-scrollbar">
+                <button onclick="navigateMain('view-storefront')" id="btn-main-storefront" class="px-4 py-1.5 rounded-full text-sm font-bold bg-strawberry text-white shadow-sm transition-all whitespace-nowrap">หน้าร้าน</button>
+                <button onclick="navigateMain('view-queue')" id="btn-main-queue" class="px-4 py-1.5 rounded-full text-sm font-bold text-thimble hover:bg-white transition-all whitespace-nowrap">เช็กคิว / รีวิว</button>
+                <button onclick="navigateMain('view-admin')" id="btn-main-admin" class="px-3 py-1.5 rounded-full text-sm font-bold text-thimble hover:bg-white transition-all whitespace-nowrap"><i class="fa-solid fa-lock"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 🍓 หน้าร้านหลัก (Storefront) 🍓 -->
+    <main id="view-storefront" class="view-section max-w-container p-4 space-y-6 pt-6 relative z-10 block">
+        
+        <div class="text-center space-y-2 fade-in">
+            <div class="relative w-56 h-48 mx-auto flex items-center justify-center mb-4">
+                <svg class="absolute inset-0 w-full h-full drop-shadow-cute-sm animate-float" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs><clipPath id="innerHeartClip-home"><path d="M 100 145 C 100 145, 30 95, 30 55 C 30 20, 75 10, 100 45 C 125 10, 170 20, 170 55 C 170 95, 100 145, 100 145 Z" /></clipPath></defs>
+                    <path d="M 45 75 C 15 65, -5 85, 10 110 C -5 120, 5 140, 30 135 C 25 150, 45 155, 60 130 Z" fill="white" stroke="#FDC3D1" stroke-width="4" stroke-linejoin="round"/>
+                    <path d="M 155 75 C 185 65, 205 85, 190 110 C 205 120, 195 140, 170 135 C 175 150, 155 155, 140 130 Z" fill="white" stroke="#CDE4FE" stroke-width="4" stroke-linejoin="round"/>
+                    <g clip-path="url(#innerHeartClip-home)">
+                        <rect x="0" y="0" width="200" height="160" fill="white"/>
+                        <image id="storefront-logo-img" href="https://placehold.co/400x320/FFDBDB/D13869?text=Chaba+Cake" x="0" y="0" width="200" height="160" preserveAspectRatio="xMidYMid slice" />
+                    </g>
+                    <path d="M 100 145 C 100 145, 30 95, 30 55 C 30 20, 75 10, 100 45 C 125 10, 170 20, 170 55 C 170 95, 100 145, 100 145 Z" fill="none" stroke="#FFDBDB" stroke-width="14" stroke-linejoin="round"/>
+                    <path d="M 100 145 C 100 145, 30 95, 30 55 C 30 20, 75 10, 100 45 C 125 10, 170 20, 170 55 C 170 95, 100 145, 100 145 Z" fill="none" stroke="#FDA8BF" stroke-width="4" stroke-linejoin="round"/>
+                </svg>
+                <div class="absolute -right-2 top-6 bg-white border-2 border-babyblue rounded-2xl px-3 py-1.5 text-xs font-bold text-babyblue shadow-sm transform rotate-6 z-20">🪼 เบ้บรับอะไรดีค้า~</div>
+            </div>
+            
+            <h2 class="text-2xl sm:text-3xl font-bold text-arcavia mt-2 text-outline-white drop-shadow-md tracking-wide">𐚁 ֹ ִ 𝑊𝑒𝑙𝑐𝑜𝑚𝑒 𝑡𝑜 𝐶ℎ𝑎𝑏𝑎 𝑆ℎ𝑜𝑟𝑡𝑐𝑎𝑘𝑒 ୧ ֹ ִִ</h2>
+            <div class="inline-block bg-white/70 backdrop-blur-md rounded-full px-5 py-1.5 border border-white/50 shadow-sm mt-2 mb-3">
+                <p id="storefront-tagline" class="text-sm text-arcavia font-bold tracking-wide">ยินดีต้อนรับเบ้บทุกคนนะค้าา</p>
+            </div>
+
+            <div id="storefront-banner-container" class="mt-4 mb-2 hidden max-w-md mx-auto relative z-10">
+                <img id="storefront-banner-img" src="" alt="Storefront Banner" class="w-full h-auto max-h-56 rounded-3xl object-cover border-4 border-white shadow-cute-sm">
+            </div>
+
+            <div class="bg-white/60 backdrop-blur-sm rounded-3xl p-5 border-2 border-blush shadow-sm text-sm text-arcavia font-medium leading-relaxed max-w-md mx-auto text-center mt-2 mb-4 relative z-10">
+                <p class="font-bold text-strawberry mb-2 text-base">˚₊‧꒰ა ยินดีต้อนรับเข้าสู่ร้านยัยชบาค่าาา ໒꒱ ‧₊˚</p>
+                <p class="mb-2">ร้านเติมเกม & แอพพรีเมียมของยัยชบา มีเกมให้เลือกเติมมากกว่า 86 เกม พร้อมบริการเมลและแอพพรีเมียมอีกมากมาย</p>
+                <p class="mb-2">มีระบบเช็คคิว สามารถติดตามสถานะออเดอร์ได้ สอบถามสินค้าและเช็คสต๊อกก่อนสั่งซื้อได้เสมอน้า</p>
+                <p class="font-bold text-peach mb-2">⤷ เลือกดูสินค้าที่สนใจได้เลยนะคะเบ้บ</p>
+                <p class="text-xs text-thimble font-bold">𓍢ִ໋เติมเกมก็ได้ แอพพรีเมียมก็มี ยัยชบายินดีให้บริการค่า ෆ</p>
+            </div>
+        </div>
+
+        <div class="flex justify-center gap-3 sm:gap-4 pt-2 pb-2 fade-in relative z-20 flex-wrap" style="animation-delay: 0.05s;">
+            <button onclick="navigateTo('view-queue')" class="flex-1 min-w-[110px] max-w-[150px] py-4 rounded-3xl text-sm font-bold bg-gradient-to-b from-peach to-strawberry text-white shadow-cute hover:-translate-y-1 hover:scale-105 transition-all duration-300 border-2 border-white flex flex-col items-center justify-center gap-1.5 group pulse-glow">
+                <i class="fa-solid fa-clipboard-list text-3xl mb-1 drop-shadow-sm group-hover:animate-bounce"></i>
+                <span>เช็กคิวของเบ้บ</span>
+            </button>
+            <a href="https://docs.google.com/spreadsheets/d/1rZkNggx9AGLLop6i2zd6rxXxrZgOi0uxX7ATwCcRJrQ/edit?usp=drivesdk" target="_blank" class="flex-1 min-w-[110px] max-w-[150px] py-4 rounded-3xl text-sm font-bold bg-white text-arcavia border-[3px] border-lavender hover:bg-lavender/50 hover:-translate-y-1 hover:scale-105 transition-all duration-300 shadow-md flex flex-col items-center justify-center gap-1.5 group interactive-btn">
+                <i class="fa-solid fa-list-ol text-purple-400 text-3xl mb-1 drop-shadow-sm group-hover:animate-bounce"></i>
+                <span>📋 ชีตคิว<br><span class="text-[10px] text-thimble font-medium">เช็คคิวเพิ่มเติมตรงนี้</span></span>
+            </a>
+            <button onclick="navigateTo('view-review')" class="flex-1 min-w-[110px] max-w-[150px] py-4 rounded-3xl text-sm font-bold bg-white text-arcavia border-[3px] border-blush hover:bg-blush hover:-translate-y-1 hover:scale-105 transition-all duration-300 shadow-md flex flex-col items-center justify-center gap-1.5 group">
+                <i class="fa-solid fa-star text-peach text-3xl mb-1 drop-shadow-sm group-hover:animate-bounce"></i>
+                <span>รีวิว & เครดิต</span>
+            </button>
+        </div>
+
+        <div class="kawaii-panel !border-strawberry/30 !bg-white/80 fade-in mt-8" style="animation-delay: 0.1s;">
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-peach to-strawberry text-white px-6 py-1.5 rounded-full font-bold text-sm shadow-md border-2 border-white z-[60] flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-crown text-lemon"></i> สินค้าแนะนำ / โปรโมชั่น 🛒
+            </div>
+            <div class="relative z-20 mt-4 text-left">
+                <div class="bg-white/60 p-4 rounded-2xl border border-blush shadow-sm mb-4 space-y-3">
+                    <div>
+                        <p class="font-bold text-strawberry mb-1"><i class="fa-solid fa-star text-peach"></i> สินค้าแนะนำ</p>
+                        <div id="display-recommended-text" class="text-sm text-arcavia pl-5 font-medium whitespace-pre-line">...</div>
+                    </div>
+                    <div class="pt-2 border-t border-blush/50">
+                        <p class="font-bold text-strawberry mb-1"><i class="fa-solid fa-bullhorn text-peach"></i> โปรโมชั่น</p>
+                        <div id="display-promotion-text" class="text-sm text-thimble pl-5 font-medium whitespace-pre-line">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- หมวดหมู่ iPhone -->
+        <div class="fade-in relative z-10 mt-6" style="animation-delay: 0.15s;">
+            <h3 class="font-bold text-xl text-arcavia mb-2 flex items-center gap-2 pl-2 text-outline-white"><span class="text-2xl animate-float">📱</span> iPhone</h3>
+            <div class="category-subtitle mb-4"><i class="fa-brands fa-apple text-strawberry mr-1.5"></i> หมวด iPhone : เช็กคิวและสั่งซื้อไอโฟนรุ่นต่างๆ ได้ที่นี่เลยค่า</div>
+            <div id="dynamic-iphone-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 relative z-10"><p class="text-sm text-thimble font-medium col-span-2">กำลังโหลดเรทราคา...</p></div>
+        </div>
+
+        <!-- หมวดหมู่เกม -->
+        <div class="fade-in relative z-10 mt-6" style="animation-delay: 0.2s;">
+            <h3 class="font-bold text-xl text-arcavia mb-2 flex items-center gap-2 pl-2 text-outline-white"><span class="text-2xl animate-bounce">🎮</span> หมวดเติมเกม</h3>
+            <div class="category-subtitle mb-4"><i class="fa-solid fa-gamepad text-strawberry mr-1.5"></i> หมวดเติมเกม : FreeFive & ROV & Heartopia และเกมอื่นๆอีก 84เกม</div>
+            <div id="dynamic-games-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 relative z-10"><p class="text-sm text-thimble font-medium col-span-2">กำลังโหลดเรทราคา...</p></div>
+        </div>
+
+        <!-- หมวดหมู่แอพพรีเมียม -->
+        <div class="fade-in mt-6 relative z-10" style="animation-delay: 0.3s;">
+            <h3 class="font-bold text-xl text-arcavia mb-2 flex items-center gap-2 pl-2 text-outline-white"><span class="text-2xl animate-float">🍏</span> แอพพรีเมียม</h3>
+            <div class="category-subtitle mb-4 leading-relaxed"><i class="fa-solid fa-mobile-screen-button text-strawberry mr-1.5"></i> หมวดแอพพรีเมียม : เน็ตฟิกซ์ & ยูทูป Wetv & Viu & IQIYI & Prime & Mono max CH 3+ & One D & Canva & BiliBili & Hbo max & Youku & ดิสนีย์</div>
+            <div id="dynamic-apps-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 relative z-10"></div>
+        </div>
+
+        <!-- 🥐 วิธีสั่งซื้อกับยัยชบา -->
+        <div class="kawaii-panel panel-purple fade-in mt-8" style="animation-delay: 0.4s;">
+            <div class="k-sparkle">✨</div>
+            <div class="relative z-20">
+                <h3 class="font-bold text-lg text-arcavia mb-4 text-center">🥐 วิธีสั่งซื้อกับยัยชบา 🥐</h3>
+                <div id="display-howto-text" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- ติดต่อ & QR Code -->
+        <div class="kawaii-panel panel-blue fade-in text-center" style="animation-delay: 0.45s;">
+            <div class="relative z-20">
+                <h3 class="font-bold text-lg text-arcavia mb-3">ติดต่อยัยชบา / ช่องทางสั่งซื้อ 📞</h3>
+                <p class="text-sm font-bold text-strawberry mb-2 bg-white/80 inline-block px-4 py-1.5 rounded-full border border-precious shadow-sm">❪ ‎𓎭 dm line @868wyuzx 𓈒 ❀ ❫</p>
+                <p class="text-xs font-medium text-thimble mb-4">‎✯ สั่งของกับแอดชบา ✯<br>(ว่างส่ง 07:30 - 03:00 ไม่มีวันหยุด)</p>
+                
+                <!-- โชว์ QR Code -->
+                <div id="qr-code-display-container" class="mb-4 hidden w-full">
+                    <p class="text-xs text-arcavia font-bold mb-2 border-t border-precious/50 pt-3">สแกนเพื่อโอนเงินได้เลยค่า 💸</p>
+                    <img id="qr-code-img-display" src="" class="w-full max-w-[320px] h-auto object-contain mx-auto rounded-3xl border-4 border-white shadow-cute">
+                </div>
+
+                <a href="https://lin.ee/dmlNukC" target="_blank" class="inline-block w-full sm:w-auto bg-[#00D13B] text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-green-400/40 hover:-translate-y-1 transition-all interactive-btn border-2 border-white pulse-green mt-2">
+                    <i class="fa-brands fa-line"></i> สั่งซื้อ / สอบถามที่ LINE
+                </a>
+            </div>
+        </div>
+
+        <div class="text-center py-6 fade-in font-medium text-arcavia relative z-10" style="animation-delay: 0.5s;">
+            <p class="font-bold text-lg mb-1 drop-shadow-sm">𐚁 ֹ ִ ‎𝐶ℎ𝑎𝑏𝑎 𝑆ℎ𝑜𝑟𝑡𝑐𝑎𝑘𝑒  ୧ ֹ ִִ</p>
+            <p class="text-sm mb-3 text-thimble font-bold">เปิดร้านแล้วค้าบบ ♡ ˎˊ˗ ˙ . ꒷  .</p>
+            <p class="text-sm font-bold text-strawberry bg-white/80 inline-block px-6 py-2.5 rounded-full border-2 border-precious shadow-sm mb-3">જ⁀➴ เปิด 07 : 00 - 04:00 ⊹ ࣪ ˖</p>
+            <p class="text-sm mb-2 text-peach font-bold">⤷ สอบถามก่อนได้นะคะ ⋆𐙚₊˚</p>
+            <p class="text-xs text-thimble/60 tracking-widest mt-4">꒷꒦꒷꒦꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷꒦꒷</p>
+        </div>
+    </main>
+
+    <!-- 🍓 หน้ารายละเอียดสินค้า 🍓 -->
+    <main id="view-product-detail" class="view-section max-w-container p-4 space-y-6 pt-6 hidden relative z-10">
+        <div class="bg-white rounded-3xl p-4 border-2 border-precious shadow-sm fade-in relative overflow-hidden group">
+            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none"></div>
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-blush border-2 border-white shadow-md flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    <img id="detail-img" src="" class="w-full h-full object-cover hidden">
+                    <span id="detail-icon-fallback" class="text-3xl">✨</span>
+                </div>
+                <div>
+                    <div class="inline-block px-2 py-0.5 bg-strawberry text-white text-[10px] font-bold rounded-md mb-1 shadow-sm" id="detail-badge">ฮิตมาก</div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-arcavia leading-tight" id="detail-name">ชื่อเกม</h2>
+                    <p class="text-xs text-thimble font-medium mt-1" id="detail-tagline"><i class="fa-solid fa-bolt text-peach"></i> รวดเร็ว ปลอดภัย ราคาดี</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="kawaii-panel fade-in" style="animation-delay: 0.1s;">
+            <div class="absolute -top-4 left-4 bg-strawberry text-white w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-md border-2 border-white z-[60]">🥞</div>
+            <h3 class="font-bold text-lg text-arcavia mb-3 ml-2 relative z-20">เลือกแพ็กเกจที่ต้องการ</h3>
+            <div id="detail-packages-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto custom-scrollbar pr-1 pb-2 relative z-20"></div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 border-4 border-blush shadow-cute fade-in sticky bottom-4 z-30" style="animation-delay: 0.2s;">
+            <h4 class="font-bold text-arcavia border-b-2 border-blush pb-2 mb-3 flex justify-between items-center"><span>สรุปรายการสั่งซื้อ 🛒</span></h4>
+            <div class="space-y-2 mb-4">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-thimble font-medium">แพ็กเกจที่เลือก:</span>
+                    <span class="font-bold text-arcavia text-right max-w-[60%]" id="summary-pkg-name">ยังไม่ได้เลือกแพ็กเกจ</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-thimble font-medium">ยอดรวม:</span>
+                    <span class="font-bold text-strawberry text-xl" id="summary-pkg-price">฿0.00</span>
+                </div>
+            </div>
+            <button onclick="confirmOrderLine()" id="btn-confirm-order" disabled class="w-full bg-[#00D13B] text-white rounded-2xl py-3.5 font-bold shadow-lg shadow-green-400/30 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-base border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed pulse-green">
+                <i class="fa-brands fa-line text-xl"></i> สั่งซื้อกับยัยชบาที่ LINE
+            </button>
+        </div>
+    </main>
+
+    <a href="https://lin.ee/dmlNukC" target="_blank" class="floating-line bg-[#00D13B] text-white w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg hover:scale-110 transition-transform animate-bounce border-2 border-white z-50 pulse-green">
+        <i class="fa-brands fa-line"></i>
+    </a>
+
+    <!-- 🍓 หน้าร้านเชกคิว 🍓 -->
+    <main id="view-queue" class="view-section max-w-container p-4 space-y-6 pt-6 hidden relative z-10">
+        <div class="flex gap-2 bg-blush/40 p-1 rounded-2xl border border-blush mb-4">
+            <button onclick="switchQueueTab('track')" id="btn-q-tab-track" class="flex-1 py-2 rounded-xl text-sm font-bold bg-strawberry text-white shadow-sm transition-all">ติดตามคิว</button>
+            <button onclick="switchQueueTab('active')" id="btn-q-tab-active" class="flex-1 py-2 rounded-xl text-sm font-bold text-thimble hover:bg-white transition-all border border-transparent">คิวกำลังทำ</button>
+        </div>
+
+        <div id="q-tab-track" class="block space-y-6">
+            <div class="kawaii-panel text-center relative group hover:shadow-lg transition-all duration-300 fade-in">
+                <div class="k-cloud-left">☁️</div><div class="k-cloud-right">☁️</div>
+                <div class="k-tulip-left">🌷</div><div class="k-tulip-right">🌷</div>
+                
+                <div class="relative z-20">
+                    <div class="absolute top-0 right-0 flex items-center gap-1.5 bg-blush px-2.5 py-1 rounded-full border border-precious shadow-sm z-10">
+                        <span class="status-dot dot-live"></span>
+                        <span class="text-[10px] font-bold text-strawberry tracking-widest">LIVE</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-peach mb-1 mt-4">ตอนนี้ยัยชบากำลังทำถึงคิว</h3>
+                    <div class="text-5xl font-bold text-arcavia my-4 tracking-wider flex items-center justify-center gap-2 drop-shadow-sm">
+                        <span id="display-current-queue">กำลังโหลด...</span> <span class="text-3xl animate-pulse text-peach drop-shadow-md">✨</span>
+                    </div>
+                    <div class="bg-blush/60 rounded-2xl p-3 mt-4 border border-precious/50 group-hover:bg-blush transition-colors">
+                        <p class="text-xs text-thimble mb-1 font-bold">เบ้บที่กำลังรออยู่</p>
+                        <div class="font-bold text-strawberry text-lg" id="display-waiting-queues">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="kawaii-panel text-center fade-in panel-blue" style="animation-delay: 0.1s;">
+                <div class="k-sparkle" style="font-size: 2.5rem; bottom: -15px;">🐋🌊</div>
+                <div class="relative z-20">
+                    <p class="text-strawberry text-sm font-bold mb-1 mt-2">꒰⋆ 𐙚 ̊ ตอนนี้ยัยชบากำลังดูแลเบ้บคิวไหนอยู่น้า 𐙚 ⋆ ꒱</p>
+                    <p class="text-thimble text-xs mb-5 font-medium">♡ กรอกเลขคิวของเบ้บด้านล่างได้เลยค่าา ᯓᡣ𐭩˚</p>
+                    <div class="relative max-w-xs mx-auto">
+                        <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none"><span class="text-precious font-bold text-lg">#</span></div>
+                        <input type="text" id="input-check-queue" placeholder="เช่น 023" class="w-full bg-white border-2 border-babyblue rounded-full py-3 pl-10 pr-4 text-center focus:outline-none focus:border-babyblue focus:ring-4 focus:ring-blue-100 transition-all font-bold text-arcavia text-lg placeholder-precious shadow-inner">
+                    </div>
+                    <button onclick="checkMyQueue()" class="mt-5 w-full max-w-xs mx-auto bg-gradient-to-r from-blue-300 to-babyblue text-blue-800 rounded-full py-3.5 font-bold shadow-lg shadow-blue-200 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-base relative z-20 border-2 border-white pulse-glow">
+                        เช็กคิวกับยัยชบา 
+                    </button>
+                </div>
+            </div>
+
+            <div id="queue-result-box" class="mt-6 bg-white rounded-3xl p-5 border-4 border-blush shadow-cute text-left hidden fade-in relative overflow-hidden">
+                <h4 class="font-bold text-xl text-arcavia border-b-2 border-blush pb-3 mb-2 flex items-center justify-between relative z-10" id="res-queue-num"><span>คิวของเบ้บ</span></h4>
+                <div id="res-order-details" class="mb-4 hidden"></div>
+                <div class="relative w-[240px] mx-auto mt-6 mb-10 z-10">
+                    <div class="absolute top-4 left-4 right-4 h-1.5 bg-blush z-0 rounded-full"></div>
+                    <div id="stepper-progress" class="absolute top-4 left-4 h-1.5 bg-strawberry z-0 rounded-full transition-all duration-500 ease-in-out" style="width: 50%"></div>
+                    <div class="relative z-10 flex justify-between">
+                        <div class="flex flex-col items-center w-8">
+                            <div id="step-icon-wait" class="w-8 h-8 rounded-full flex items-center justify-center bg-white border-2 border-blush text-precious z-10 transition-all duration-300"><i class="fa-solid fa-clipboard-list text-xs"></i></div>
+                            <span class="absolute top-10 text-[11px] font-bold text-thimble whitespace-nowrap mt-1">รอคิว</span>
+                        </div>
+                        <div class="flex flex-col items-center w-8">
+                            <div id="step-icon-processing" class="w-8 h-8 rounded-full flex items-center justify-center bg-white border-2 border-blush text-precious z-10 transition-all duration-300"><i class="fa-solid fa-fire-burner text-xs"></i></div>
+                            <span class="absolute top-10 text-[11px] font-bold text-thimble whitespace-nowrap mt-1">กำลังทำ</span>
+                        </div>
+                        <div class="flex flex-col items-center w-8">
+                            <div id="step-icon-completed" class="w-8 h-8 rounded-full flex items-center justify-center bg-white border-2 border-blush text-precious z-10 transition-all duration-300"><i class="fa-solid fa-box-open text-xs"></i></div>
+                            <span class="absolute top-10 text-[11px] font-bold text-thimble whitespace-nowrap mt-1">เสร็จแล้ว</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-2 mt-4 bg-blush/40 p-3 rounded-2xl border border-blush/60 relative z-10">
+                    <p class="flex items-center justify-between text-sm"><span class="text-thimble font-semibold">ตอนนี้กำลังทำถึงคิว</span> <span class="font-bold bg-white px-2 py-0.5 rounded text-strawberry border border-precious/40 shadow-sm" id="res-current-q">...</span></p>
+                    <p class="flex items-center justify-between text-sm" id="res-remaining-container"><span class="text-thimble font-semibold">คิวของBabeเหลืออีกประมาณ</span> <span class="font-bold text-peach bg-white px-2 py-0.5 rounded border border-precious/40 shadow-sm" id="res-remaining-q">...</span></p>
+                </div>
+                <div class="mt-4 p-3 bg-gradient-to-br from-white to-blush/50 rounded-2xl border border-precious text-center text-sm text-strawberry font-medium leading-relaxed shadow-sm relative z-10" id="res-cute-msg">กำลังโหลดข้อมูล...</div>
+            </div>
+        </div>
+
+        <div id="q-tab-active" class="hidden space-y-4">
+            <h3 class="font-bold text-lg text-arcavia flex items-center gap-2 mb-2 pl-2"><i class="fa-solid fa-spinner animate-spin-slow text-peach"></i> ออเดอร์กำลังดำเนินการ ⏳</h3>
+            <div id="public-active-orders-list" class="space-y-3"><p class="text-center py-8 text-thimble font-medium bg-white/50 rounded-2xl">ไม่มีออเดอร์ค้างน้า 🎀</p></div>
+        </div>
+    </main>
+
+    <!-- 🍓 หน้ารีวิว 🍓 -->
+    <main id="view-review" class="view-section max-w-container p-4 space-y-6 pt-6 hidden relative z-10">
+        <div class="kawaii-panel text-center fade-in panel-purple">
+            <div class="k-bow">🎀</div><div class="k-heart">🩷</div><div class="k-star">⭐</div>
+            <div class="relative z-20 mt-2">
+                <h3 class="font-bold text-strawberry text-lg mb-1 relative z-10">เครดิตจากลูกค้าที่น่ารักของยัยชบา~</h3>
+                <p class="text-xs text-thimble mb-4 font-medium relative z-10">เป็นกำลังใจเล็กๆ ให้ร้านเราน้า</p>
+                
+                <div id="plusone-banner-container" class="mb-4 hidden">
+                    <img id="plusone-banner-img" src="" alt="PlusOne Banner" class="w-full h-auto max-h-48 rounded-2xl object-cover border-4 border-white shadow-sm mx-auto">
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 inline-block shadow-sm mb-5 border-2 border-lavender relative z-10 w-4/5">
+                    <p class="text-sm font-bold text-arcavia">Chaba Shortcake</p>
+                    <p class="text-xs text-peach mt-1 font-medium">ได้รับ Plus One แล้ว</p>
+                    <div class="text-4xl font-bold text-strawberry mt-2 flex items-center justify-center gap-1 drop-shadow-sm">
+                        <span id="display-plus-one">...</span> <span class="text-2xl animate-pulse">♡</span>
+                    </div>
+                </div>
+                <button id="btn-plus-one" onclick="givePlusOne(this)" class="relative z-10 w-full bg-strawberry text-white rounded-full py-3.5 font-bold shadow-lg shadow-strawberry/40 hover:bg-arcavia transition-all flex items-center justify-center gap-2 hover:-translate-y-1 border-2 border-white pulse-glow"><i class="fa-solid fa-heart"></i> Plus One ให้ยัยชบา</button>
+                <p id="plus-one-thank-you" class="text-sm text-strawberry mt-4 hidden whitespace-pre-line font-medium bg-blush/60 p-3 rounded-xl border border-precious relative z-10"></p>
+            </div>
+        </div>
+
+        <div class="kawaii-panel fade-in" style="animation-delay: 0.1s;">
+            <div class="k-bow">🎀</div><div class="k-heart">🩷</div><div class="k-star">⭐</div>
+            <div class="relative z-20 mt-2">
+                <h3 class="font-bold text-lg text-arcavia mb-4 flex items-center gap-2"><i class="fa-solid fa-comment-dots text-strawberry"></i> รีวิวจากลูกค้าที่น่ารัก~</h3>
+                <div id="public-reviews-container" class="space-y-4 mb-6"><p class="text-sm text-thimble text-center py-4 font-medium">กำลังโหลดข้อมูล...</p></div>
+                <hr class="border-precious my-5 border-dashed">
+                <h4 class="font-bold text-strawberry text-base mb-3">เขียนรีวิวให้ยัยชบา</h4>
+                <div class="bg-white rounded-2xl p-4 border-2 border-blush shadow-inner">
+                    <div class="flex justify-center gap-2 text-3xl mb-4 star-rating" id="review-stars-input">
+                        <i class="fa-solid fa-star" data-rating="1"></i><i class="fa-solid fa-star" data-rating="2"></i><i class="fa-solid fa-star" data-rating="3"></i><i class="fa-solid fa-star" data-rating="4"></i><i class="fa-solid fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="review-rating" value="5">
+                    <input type="text" id="review-name" placeholder="ชื่อที่ใช้แสดง / ชื่อเล่น" class="w-full bg-blush/30 border-2 border-blush rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-precious mb-3 font-medium text-arcavia placeholder-thimble/70">
+                    <textarea id="review-text" rows="3" placeholder="ความประทับใจ..." class="w-full bg-blush/30 border-2 border-blush rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-precious resize-none mb-3 font-medium text-arcavia placeholder-thimble/70"></textarea>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-thimble mb-1.5">เพิ่มรูปภาพ / GIF รีวิว</label>
+                        <div class="flex items-center gap-2">
+                            <label class="cursor-pointer bg-blush text-strawberry px-4 py-2 rounded-xl text-xs font-bold hover:bg-precious hover:text-white transition-colors flex items-center gap-2 border border-precious shadow-sm">
+                                <i class="fa-solid fa-camera"></i> เลือกรูป / GIF <input type="file" id="review-image" accept="image/*,.gif" class="hidden" onchange="handleImagePreview(event)">
+                            </label>
+                            <button type="button" id="btn-remove-review-img" onclick="removePreviewImage()" class="hidden text-xs font-bold text-arcavia bg-white px-3 py-2 border border-precious rounded-xl hover:bg-blush shadow-sm"><i class="fa-solid fa-trash"></i> ลบ</button>
+                        </div>
+                        <div id="review-img-preview-container" class="mt-3 hidden relative inline-block max-w-full"><img id="review-img-preview" src="" class="w-auto h-auto max-h-48 rounded-xl object-contain border-2 border-precious shadow-sm"></div>
+                    </div>
+                    <button onclick="submitReview(this)" class="w-full bg-peach text-white rounded-xl py-3 font-bold hover:bg-thimble transition-colors text-sm shadow-md shadow-peach/40 relative z-20 border-2 border-white pulse-glow">ส่งรีวิว</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 🍓 เข้าสู่ระบบ -->
+    <main id="view-login" class="view-section max-w-container p-4 pt-20 hidden relative z-10 fade-in text-center">
+        <div class="kawaii-panel text-center relative">
+            <div class="k-bow">🎀</div><div class="k-heart">🩷</div><div class="k-star">⭐</div>
+            <div class="relative z-20 mt-4">
+                <h2 class="text-2xl font-bold text-arcavia mb-2">เข้าสู่ระบบหลังบ้าน</h2>
+                <p class="text-sm text-thimble mb-6 font-medium">พื้นที่สำหรับยัยชบาเท่านั้นนะค้า</p>
+                <input type="email" id="admin-email" placeholder="อีเมล" class="w-full bg-white border-2 border-precious rounded-full py-3 px-5 text-center focus:outline-none focus:border-strawberry focus:ring-4 focus:ring-blush transition-all font-bold text-arcavia text-base mb-3 shadow-inner">
+                <input type="password" id="admin-password" placeholder="รหัสผ่าน" class="w-full bg-white border-2 border-precious rounded-full py-3 px-5 text-center focus:outline-none focus:border-strawberry focus:ring-4 focus:ring-blush transition-all font-bold text-arcavia text-base mb-4 shadow-inner">
+                <button onclick="adminLogin(this)" class="w-full bg-gradient-to-r from-peach to-strawberry text-white rounded-full py-3.5 font-bold shadow-lg shadow-strawberry/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 text-base pulse-glow">เข้าสู่ระบบ</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 🍓 หน้าหลังบ้าน (Admin) 🍓 -->
+    <main id="view-admin" class="view-section max-w-container p-4 space-y-6 pt-6 hidden relative z-10">
+        <div class="flex items-center justify-between bg-white/80 backdrop-blur px-5 py-3 rounded-2xl border border-precious shadow-sm">
+            <h2 class="text-xl sm:text-2xl font-bold text-arcavia flex items-center gap-2"><i class="fa-solid fa-lock text-precious"></i> หลังบ้าน</h2>
+            <button onclick="adminLogout(this)" class="text-sm text-strawberry font-bold bg-blush px-3 py-1.5 rounded-lg border border-precious hover:bg-white transition-colors">ออก <i class="fa-solid fa-sign-out-alt"></i></button>
+        </div>
+
+        <div class="flex gap-2 mb-4 fade-in flex-wrap">
+            <button id="btn-admin-tab-settings" onclick="switchAdminSubTab('settings')" class="flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-strawberry text-white shadow-md transition-all">ตั้งค่า</button>
+            <button id="btn-admin-tab-queue" onclick="switchAdminSubTab('queue')" class="flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-strawberry border-2 border-precious hover:bg-blush transition-all">คิว/ออเดอร์</button>
+            <button id="btn-admin-tab-review" onclick="switchAdminSubTab('review')" class="flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-strawberry border-2 border-precious hover:bg-blush transition-all">รีวิว</button>
+            <button id="btn-admin-tab-product" onclick="switchAdminSubTab('product')" class="flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-strawberry border-2 border-precious hover:bg-blush transition-all">สินค้า</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 fade-in">
+            <div class="bg-white/90 p-4 rounded-3xl border-4 border-blush text-center"><div class="text-strawberry font-bold">Plus One</div><div class="text-3xl font-bold text-arcavia" id="admin-stat-plus">...</div></div>
+            <div class="bg-white/90 p-4 rounded-3xl border-4 border-blush text-center"><div class="text-peach font-bold">รีวิวทั้งหมด</div><div class="text-3xl font-bold text-arcavia" id="admin-stat-reviews">...</div></div>
+        </div>
+
+        <!-- Admin Tab: ตั้งค่าหน้าเว็บ -->
+        <div id="admin-tab-settings" class="admin-sub-section space-y-6 block">
+            <div class="kawaii-panel space-y-5 fade-in">
+                <h3 class="font-bold text-lg text-arcavia flex items-center gap-2 border-b border-blush pb-2 relative z-20"><i class="fa-solid fa-sliders text-strawberry"></i> 1. ตั้งค่าข้อความต้อนรับ</h3>
+                <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush space-y-3 relative z-20">
+                    <div>
+                        <label class="block font-bold text-sm text-arcavia mb-1">คำโปรยหน้าร้าน (Tagline)</label>
+                        <input type="text" id="admin-shop-tagline" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium">
+                    </div>
+                    <button onclick="adminUpdateTagline(this)" class="bg-peach text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm interactive-btn">บันทึกคำโปรย</button>
+                </div>
+
+                <h3 class="font-bold text-lg text-arcavia flex items-center gap-2 border-b border-blush pb-2 pt-2 relative z-20"><i class="fa-solid fa-star text-strawberry"></i> 2. สินค้าแนะนำ & โปรโมชั่น</h3>
+                <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush space-y-3 relative z-20">
+                    <div>
+                        <label class="block font-bold text-sm text-strawberry mb-1">สินค้าแนะนำ (พิมพ์ข้อความแต่ละบรรทัด)</label>
+                        <textarea id="admin-recommended-text" rows="3" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia"></textarea>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-sm text-strawberry mb-1">โปรโมชั่นร้าน</label>
+                        <textarea id="admin-promotion-text" rows="3" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia"></textarea>
+                    </div>
+                    <button onclick="adminUpdatePromoAndRec(this)" class="bg-strawberry text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm interactive-btn">บันทึก</button>
+                </div>
+
+                <h3 class="font-bold text-lg text-arcavia flex items-center gap-2 border-b border-blush pb-2 pt-2 relative z-20"><i class="fa-solid fa-bag-shopping text-strawberry"></i> 3. ตั้งค่าวิธีการสั่งซื้อ</h3>
+                <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush space-y-3 relative z-20">
+                    <div>
+                        <label class="block font-bold text-sm text-arcavia mb-1">ขั้นตอนวิธีสั่งซื้อ (ข้อความ)</label>
+                        <textarea id="admin-howto-text" rows="5" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia" placeholder="ระบุขั้นตอนการสั่งซื้อ แต่ละบรรทัดจะเป็น 1 ข้อ"></textarea>
+                    </div>
+                    <button onclick="adminUpdateHowTo(this)" class="bg-peach text-white px-5 py-2 rounded-xl text-xs font-bold shadow-sm interactive-btn">บันทึกวิธีสั่งซื้อ</button>
+                </div>
+
+                <h3 class="font-bold text-lg text-arcavia flex items-center gap-2 border-b border-blush pb-2 pt-2 relative z-20"><i class="fa-solid fa-image text-strawberry"></i> 4. รูปภาพ / แบนเนอร์ / โลโก้</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-20">
+                    
+                    <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="font-bold text-xs text-arcavia">แบนเนอร์หน้าร้าน (รูป/GIF)</label>
+                            <button type="button" id="btn-remove-store-banner" onclick="removeStorefrontBanner(this)" class="hidden text-[10px] font-bold text-arcavia bg-white px-2 py-0.5 rounded border border-precious">ลบ</button>
+                        </div>
+                        <div id="store-banner-preview-box" class="mb-2 hidden text-center"><img id="store-banner-preview-img" src="" class="max-h-24 mx-auto rounded-xl border object-contain"></div>
+                        <label class="cursor-pointer block bg-strawberry text-white py-2 rounded-xl text-xs font-bold text-center shadow-sm">เลือกรูป <input type="file" accept="image/*,.gif" class="hidden" onchange="handleStorefrontBannerUpload(event)"></label>
+                    </div>
+
+                    <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="font-bold text-xs text-arcavia">แบนเนอร์ Plus One (รูป/GIF)</label>
+                            <button type="button" id="btn-remove-plusone-banner" onclick="removePlusOneBanner(this)" class="hidden text-[10px] font-bold text-arcavia bg-white px-2 py-0.5 rounded border border-precious">ลบ</button>
+                        </div>
+                        <div id="plusone-banner-preview-box" class="mb-2 hidden text-center"><img id="plusone-banner-preview-img" src="" class="max-h-24 mx-auto rounded-xl border object-contain"></div>
+                        <label class="cursor-pointer block bg-strawberry text-white py-2 rounded-xl text-xs font-bold text-center shadow-sm">เลือกรูป <input type="file" accept="image/*,.gif" class="hidden" onchange="handlePlusOneBannerUpload(event)"></label>
+                    </div>
+                    
+                    <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="font-bold text-xs text-arcavia">QR Code รับเงินโอน</label>
+                            <button type="button" id="btn-remove-qr" onclick="removeQRCode(this)" class="hidden text-[10px] font-bold text-arcavia bg-white px-2 py-0.5 rounded border border-precious">ลบ</button>
+                        </div>
+                        <div id="qr-preview-box" class="mb-2 hidden text-center"><img id="qr-preview-img" src="" class="max-h-24 mx-auto rounded-xl border object-contain"></div>
+                        <label class="cursor-pointer block bg-peach text-white py-2 rounded-xl text-xs font-bold text-center shadow-sm">เลือกรูป QR <input type="file" accept="image/*" class="hidden" onchange="handleQRCodeUpload(event)"></label>
+                    </div>
+
+                    <div class="bg-white/80 p-4 rounded-2xl border-2 border-blush flex flex-col justify-center items-center">
+                        <div class="w-12 h-12 rounded-full border border-precious overflow-hidden relative bg-white mb-2"><img id="admin-logo-img" src="" class="absolute inset-0 w-full h-full object-cover"></div>
+                        <div class="font-bold text-sm text-arcavia mb-2">โลโก้ร้าน (หัวใจ)</div>
+                        <label class="cursor-pointer bg-white border border-precious text-arcavia px-3 py-1.5 rounded-xl text-xs font-bold text-center w-full shadow-sm hover:bg-blush transition-colors">
+                            เปลี่ยนโลโก้ <input type="file" id="shop-logo-upload" accept="image/*,.gif" class="hidden" onchange="handleShopLogoUpload(event)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tab: จัดการคิว & ออเดอร์ -->
+        <div id="admin-tab-queue" class="admin-sub-section space-y-6 hidden">
+            <div class="flex gap-2 mb-2">
+                <button onclick="switchAdminQueueSub('manage')" id="btn-admin-qsub-manage" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-peach text-white shadow-sm border border-white">จัดการคิว/ออเดอร์</button>
+                <button onclick="switchAdminQueueSub('history')" id="btn-admin-qsub-history" class="flex-1 py-1.5 rounded-xl text-xs font-bold bg-white text-peach border border-peach hover:bg-blush">ประวัติการสั่งซื้อ 🧾</button>
+            </div>
+            <div id="admin-qsub-manage" class="block">
+                <div class="kawaii-panel fade-in">
+                    <h3 class="font-bold text-lg mb-4 text-arcavia relative z-20"><i class="fa-solid fa-plus-circle text-peach"></i> เพิ่มออเดอร์ / คิวใหม่</h3>
+                    <div class="bg-white/80 rounded-2xl p-4 mb-5 border border-precious shadow-sm relative z-20 space-y-3">
+                        <div class="flex gap-3">
+                            <div class="w-1/3"><label class="block text-xs font-bold mb-1 text-arcavia">เลขคิว *</label><input type="text" id="admin-new-q" placeholder="เช่น 026" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"></div>
+                            <div class="w-2/3"><label class="block text-xs font-bold mb-1 text-arcavia">ชื่อเกม / แอพ / รุ่น</label><input type="text" id="admin-new-q-item" placeholder="เช่น ROV / Netflix / iPhone 15" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia"></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-2/3"><label class="block text-xs font-bold mb-1 text-arcavia">รายละเอียดแพ็กเกจ</label><input type="text" id="admin-new-q-pkg" placeholder="เช่น 90 คูปอง" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia"></div>
+                            <div class="w-1/3"><label class="block text-xs font-bold mb-1 text-arcavia">ยอดเงิน</label><input type="text" id="admin-new-q-price" placeholder="เช่น 29 บาท" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia"></div>
+                        </div>
+                        <button onclick="adminAddQueueWithOrder(this)" class="w-full bg-peach text-white rounded-xl py-2.5 text-sm font-bold shadow-sm interactive-btn">+ บันทึกออเดอร์ & สร้างคิว</button>
+                    </div>
+
+                    <div class="bg-white/80 rounded-2xl p-4 mb-5 flex flex-wrap items-end gap-3 border-2 border-strawberry shadow-sm relative z-20">
+                        <div class="flex-1 min-w-[150px]"><label class="block text-xs font-bold text-strawberry mb-1">📌 ล็อกคิวปัจจุบันที่กำลังทำ</label><input type="text" id="admin-current-q-input" placeholder="กรอกเลขคิว" class="w-full bg-blush/30 border border-blush rounded-xl py-2 px-3 text-sm font-bold text-arcavia"></div>
+                        <button onclick="adminSetCurrentQueue(this)" class="bg-strawberry text-white rounded-xl px-5 py-2.5 text-sm font-bold shadow-md interactive-btn">อัปเดต</button>
+                    </div>
+
+                    <h4 class="font-bold text-sm text-arcavia mb-2 relative z-20">คิวที่ยังไม่เสร็จ (รอดำเนินการ / กำลังทำ)</h4>
+                    <div class="space-y-3 relative z-20" id="admin-active-orders-list"><p class="text-center py-4 text-sm font-bold text-thimble bg-white/50 rounded-2xl">กำลังโหลด...</p></div>
+                </div>
+            </div>
+            <div id="admin-qsub-history" class="hidden">
+                <div class="kawaii-panel fade-in">
+                    <h3 class="font-bold text-lg mb-4 text-arcavia relative z-20"><i class="fa-solid fa-receipt text-peach"></i> ประวัติการสั่งซื้อ (เสร็จสิ้น)</h3>
+                    <div class="space-y-3 relative z-20" id="admin-history-orders-list"><p class="text-center py-4 text-sm font-bold text-thimble bg-white/50 rounded-2xl">กำลังโหลด...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-tab-review" class="admin-sub-section space-y-6 hidden">
+            <div class="kawaii-panel fade-in">
+                <h3 class="font-bold text-lg mb-4 text-arcavia relative z-20">จัดการรีวิว</h3>
+                <div class="space-y-4 relative z-20" id="admin-review-list"><p class="text-center py-4 font-bold">กำลังโหลด...</p></div>
+            </div>
+        </div>
+
+        <!-- Admin Tab: จัดการสินค้า -->
+        <div id="admin-tab-product" class="admin-sub-section space-y-6 hidden">
+            <div class="kawaii-panel fade-in">
+                <h3 class="font-bold text-lg mb-4 text-arcavia relative z-20">จัดการสินค้าและเรทราคา</h3>
+                <div class="bg-white/80 rounded-2xl p-4 mb-5 border-2 border-precious shadow-sm relative z-20">
+                    <h4 class="font-bold text-sm text-strawberry mb-3" id="product-form-title">+ เพิ่มสินค้าใหม่</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div><label class="block text-xs font-bold text-thimble mb-1">หมวดหมู่</label><select id="prod-type" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"><option value="game">🎮 เกม</option><option value="app">🍏 แอพพรีเมียม</option><option value="iphone">📱 iPhone</option></select></div>
+                        <div><label class="block text-xs font-bold text-thimble mb-1">ชื่อสินค้า</label><input type="text" id="prod-name" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"></div>
+                        <div><label class="block text-xs font-bold text-thimble mb-1">เรทราคาแสดงบนการ์ด</label><input type="text" id="prod-price" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"></div>
+                        <div><label class="block text-xs font-bold text-thimble mb-1">ป้ายกำกับมุมขวาบน</label><input type="text" id="prod-badge" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"></div>
+                        <div><label class="block text-xs font-bold text-thimble mb-1">ธีมสีการ์ด</label><select id="prod-color" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-bold text-arcavia"><option value="babyblue">🪼 ฟ้าพาสเทล</option><option value="precious">🩷 ชมพูพาสเทล</option><option value="lavender">🫐 ม่วงพาสเทล</option><option value="blush">🌷 ชมพูอ่อน</option></select></div>
+                        <div><label class="block text-xs font-bold text-thimble mb-1">อัปโหลดรูปภาพไอคอน</label><input type="file" id="prod-img-upload" accept="image/*" class="w-full text-xs" onchange="handleProductImgTemp(event)"><img id="prod-img-preview" src="" class="h-10 mt-2 rounded hidden object-contain border border-precious"></div>
+                        <div class="sm:col-span-2"><label class="block text-xs font-bold text-strawberry mb-1">รายละเอียดเรทราคาเต็ม (พิมพ์: ชื่อแพ็ค = ราคา)</label><textarea id="prod-rates-detail" rows="4" class="w-full bg-white border border-precious rounded-xl py-2 px-3 text-sm font-medium text-arcavia placeholder-thimble/60" placeholder="เช่น&#10;90 คูปอง = 29 บาท"></textarea></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="adminSaveProduct(this)" class="bg-peach text-white rounded-xl px-5 py-2 text-sm font-bold shadow-sm flex-1 interactive-btn">บันทึกข้อมูล</button>
+                        <button onclick="adminResetProductForm()" class="bg-white text-thimble border border-precious rounded-xl px-5 py-2 text-sm font-bold interactive-btn">ล้างข้อมูล</button>
+                        <input type="hidden" id="prod-edit-id" value="">
+                        <input type="hidden" id="prod-img-url-temp" value="">
+                    </div>
+                </div>
+                <div class="space-y-3 relative z-20" id="admin-products-list"><p class="text-center py-4 text-sm font-bold text-thimble">กำลังโหลดข้อมูลสินค้า...</p></div>
+            </div>
+        </div>
+        <div class="h-20"></div>
+    </main>
+
+    <script>
+        const SUPABASE_URL = 'https://gsghucmvcqucpvxvlgdh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzZ2h1Y212Y3F1Y3B2eHZsZ2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjM3NjUsImV4cCI6MjEwNzUzOTc2NX0.4fKE_j2xZRUA6zNKNz0xsCwHN_60HQII9beMRAPju-o';
+        const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let state = {
+            isAdminLoggedIn: false,
+            shopTagline: 'ยินดีต้อนรับเบ้บทุกคนนะค้าา',
+            shopLogo: 'https://placehold.co/400x320/FFDBDB/D13869?text=Chaba+Cake',
+            storefrontBanner: null, plusoneBanner: null, qrCodeImg: null,
+            recommendedText: '', promotionText: '', howtoText: '',
+            currentQueue: '000', queues: [], plusOneCount: 0, reviews: [], products: [],
+            hasProductsTable: true, compressedImgBase64: null, currentProduct: null, selectedPackage: null
+        };
+
+        const statusConfig = {
+            'wait': { label: 'รอคิว', color: 'text-thimble', msg: 'ෆ_เบ้บรอยัยชบาแป๊บนึงน้าา\nตอนนี้ออเดอร์ของเบ้บอยู่ในคิวค่า_ෆ', bg: 'bg-yellow-100', border: 'border-yellow-300' },
+            'processing': { label: 'กำลังทำ', color: 'text-strawberry', msg: 'ถึงคิวของเบ้บแล้วค่าา!\nยัยชบากำลังจัดการให้เลยน้า 🥐', bg: 'bg-blush/40', border: 'border-peach' },
+            'completed': { label: 'เสร็จแล้ว', color: 'text-green-600', msg: 'เสร็จเรียบร้อยแล้วค่าา\nขอบคุณที่รอยัยชบนะค้าา ෆ', bg: 'bg-green-100', border: 'border-green-300' },
+            'issue': { label: 'ติดปัญหา', color: 'text-red-500', msg: 'แงง ดูเหมือนออเดอร์จะมีปัญหานิดหน่อยคับ\nรบกวนเบ้บทักหายัยชบาทีน้า 🥺', bg: 'bg-red-100', border: 'border-red-300' }
+        };
+
+        const defaultProducts = [
+            { id: 'def1', type: 'game', name: 'ROV', price_text: 'เริ่มต้น 20.-', badge: 'ฮิตมาก!', image_url: 'https://placehold.co/150/CDE4FE/6B7280?text=ROV', bg_color: 'babyblue', rates_detail: '90 คูปอง = 29 บาท\n285 คูปอง = 89 บาท' }
+        ];
+
+        let navHistory = [];
+        let currentActiveView = 'view-storefront';
+
+        function navigateMain(targetView) { navHistory = []; if(targetView === 'view-admin') { targetView = state.isAdminLoggedIn ? 'view-admin' : 'view-login'; } renderView(targetView); updateNavbarActiveState(targetView); }
+        function navigateTo(targetView) { if(currentActiveView === targetView) return; navHistory.push(currentActiveView); renderView(targetView); updateNavbarActiveState(targetView); }
+        function goBack() { if(navHistory.length === 0) return; const targetView = navHistory.pop(); renderView(targetView); updateNavbarActiveState(targetView); }
+
+        function renderView(targetId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(targetId).classList.remove('hidden');
+            currentActiveView = targetId;
+            const btnBack = document.getElementById('btn-nav-back');
+            const navBrand = document.getElementById('nav-brand-title');
+            if(navHistory.length > 0) { btnBack.classList.remove('hidden'); if(window.innerWidth < 640) navBrand.classList.add('hidden'); } 
+            else { btnBack.classList.add('hidden'); navBrand.classList.remove('hidden'); }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateNavbarActiveState(viewId) {
+            const btnStore = document.getElementById('btn-main-storefront');
+            const btnQueue = document.getElementById('btn-main-queue');
+            const btnAdmin = document.getElementById('btn-main-admin');
+            const baseClass = "px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ";
+            const adminBase = "px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ";
+            const inActiveClass = "text-thimble hover:bg-white";
+            const activeClass = "bg-strawberry text-white shadow-sm";
+            const activeAdmin = "bg-arcavia text-white shadow-sm";
+            btnStore.className = baseClass + inActiveClass; btnQueue.className = baseClass + inActiveClass; btnAdmin.className = adminBase + inActiveClass;
+            if(viewId === 'view-storefront') btnStore.className = baseClass + activeClass;
+            else if(viewId === 'view-queue' || viewId === 'view-review') btnQueue.className = baseClass + activeClass;
+            else if(viewId === 'view-admin' || viewId === 'view-login') btnAdmin.className = adminBase + activeAdmin;
+        }
+
+        function switchQueueTab(tab) {
+            document.getElementById('q-tab-track').classList.add('hidden'); document.getElementById('q-tab-active').classList.add('hidden');
+            document.getElementById(`q-tab-${tab}`).classList.remove('hidden');
+            const btnTrack = document.getElementById('btn-q-tab-track'); const btnActive = document.getElementById('btn-q-tab-active');
+            if(tab === 'track') { btnTrack.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-strawberry text-white shadow-sm transition-all'; btnActive.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-thimble hover:bg-white transition-all border border-transparent'; } 
+            else { btnActive.className = 'flex-1 py-2 rounded-xl text-sm font-bold bg-peach text-white shadow-sm transition-all'; btnTrack.className = 'flex-1 py-2 rounded-xl text-sm font-bold text-thimble hover:bg-white transition-all border border-transparent'; }
+        }
+
+        function switchAdminQueueSub(tab) {
+            document.getElementById('admin-qsub-manage').classList.add('hidden'); document.getElementById('admin-qsub-history').classList.add('hidden');
+            document.getElementById(`admin-qsub-${tab}`).classList.remove('hidden');
+            const btnMng = document.getElementById('btn-admin-qsub-manage'); const btnHist = document.getElementById('btn-admin-qsub-history');
+            if(tab === 'manage') { btnMng.className = 'flex-1 py-1.5 rounded-xl text-xs font-bold bg-peach text-white shadow-sm border border-white'; btnHist.className = 'flex-1 py-1.5 rounded-xl text-xs font-bold bg-white text-peach border border-peach hover:bg-blush'; } 
+            else { btnHist.className = 'flex-1 py-1.5 rounded-xl text-xs font-bold bg-peach text-white shadow-sm border border-white'; btnMng.className = 'flex-1 py-1.5 rounded-xl text-xs font-bold bg-white text-peach border border-peach hover:bg-blush'; }
+        }
+
+        // ฟังก์ชันสลับแท็บหลังบ้านหลัก (ตั้งค่า, คิว/ออเดอร์, รีวิว, สินค้า) ที่หายไป
+        function switchAdminSubTab(tab) {
+            document.querySelectorAll('.admin-sub-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+
+            const btns = ['settings', 'queue', 'review', 'product'];
+            btns.forEach(b => {
+                const btn = document.getElementById(`btn-admin-tab-${b}`);
+                if(b === tab) {
+                    btn.className = 'flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-strawberry text-white shadow-md transition-all';
+                } else {
+                    btn.className = 'flex-1 min-w-[80px] px-2 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white text-strawberry border-2 border-precious hover:bg-blush transition-all';
+                }
+            });
+        }
+
+        window.onload = async function() {
+            initStarRating();
+            const { data: { session } } = await supaClient.auth.getSession();
+            if (session) { const { data: isAdmin } = await supaClient.rpc('is_admin'); if (isAdmin) state.isAdminLoggedIn = true; }
+            await fetchDataFromSupabase();
+            navigateMain('view-storefront');
+        };
+
+        async function fetchDataFromSupabase() {
+            try {
+                const { data: settings } = await supaClient.from('shop_settings').select('*').eq('id', 1).single();
+                if (settings) {
+                    state.shopTagline = settings.shop_tagline || 'ยินดีต้อนรับเบ้บทุกคนนะค้าา';
+                    state.currentQueue = settings.current_queue || '000';
+                    state.plusOneCount = settings.plus_one_count || 0;
+                    if(settings.shop_logo) state.shopLogo = settings.shop_logo;
+                    if(settings.storefront_banner) state.storefrontBanner = settings.storefront_banner;
+                    if(settings.plusone_banner) state.plusoneBanner = settings.plusone_banner;
+                    if(settings.qr_code_img) state.qrCodeImg = settings.qr_code_img;
+                    if(settings.recommended_text) state.recommendedText = settings.recommended_text;
+                    if(settings.promotion_text) state.promotionText = settings.promotion_text;
+                    if(settings.howto_text) state.howtoText = settings.howto_text;
+                }
+
+                try {
+                    const { data: prods, error: pErr } = await supaClient.from('shop_products').select('*').order('id', { ascending: true });
+                    if(pErr) throw pErr;
+                    state.products = prods && prods.length > 0 ? prods : [];
+                    state.hasProductsTable = true;
+                } catch(err) { state.hasProductsTable = false; state.products = defaultProducts; }
+
+                const { data: queuesData } = await supaClient.from('queues').select('*').order('created_at', { ascending: true });
+                if (queuesData) state.queues = queuesData;
+
+                let revQuery = supaClient.from('reviews').select('*').order('created_at', { ascending: false });
+                if(!state.isAdminLoggedIn) revQuery = revQuery.eq('status', 'approved');
+                const { data: reviewsData } = await revQuery;
+                if (reviewsData) state.reviews = reviewsData;
+
+                updateAllViews();
+            } catch (error) { console.error("Error fetching:", error); }
+        }
+
+        function updateAllViews() {
+            document.getElementById('storefront-tagline').textContent = state.shopTagline;
+            document.getElementById('storefront-logo-img').setAttribute('href', state.shopLogo);
+            document.getElementById('display-recommended-text').innerHTML = escapeHtml(state.recommendedText).replace(/\n/g, '<br>');
+            document.getElementById('display-promotion-text').innerHTML = escapeHtml(state.promotionText).replace(/\n/g, '<br>');
+            document.getElementById('display-plus-one').textContent = state.plusOneCount.toLocaleString();
+            
+            const howtoContainer = document.getElementById('display-howto-text');
+            let textToRender = state.howtoText;
+            if (!textToRender || textToRender.trim() === '') textToRender = "แจ้งสินค้าที่ลูกค้าสนใจ\nรอยัยชบาเช็คสต๊อก แล้วคอนเฟิร์ม order (ไม่โอนก่อนคอนเฟิร์มออเดอร์นะคะ ไม่โอนคืนทุกกรณี)\nยัยชบาแจ้งราคาสินค้า (โอนเงิน = ยอมรับ สามารถเช็คคิวได้เลยนะคะ)";
+            const lines = textToRender.split('\n').filter(line => line.trim() !== '');
+            const colorThemes = [ { bg: 'bg-lavender', text: 'text-purple-700', border: 'border-lavender' }, { bg: 'bg-blush', text: 'text-strawberry', border: 'border-blush' }, { bg: 'bg-babyblue', text: 'text-blue-700', border: 'border-babyblue' }, { bg: 'bg-lemon', text: 'text-yellow-700', border: 'border-lemon' }, { bg: 'bg-precious', text: 'text-arcavia', border: 'border-precious' } ];
+            howtoContainer.innerHTML = lines.map((line, index) => {
+                const theme = colorThemes[index % colorThemes.length];
+                return `<div class="flex items-start gap-3 bg-white/60 p-3 rounded-2xl border ${theme.border}"><div class="w-8 h-8 rounded-full ${theme.bg} ${theme.text} font-bold flex items-center justify-center shrink-0 mt-0.5 shadow-sm">${index + 1}</div><p class="text-sm font-medium text-arcavia leading-relaxed whitespace-pre-line">${escapeHtml(line.trim())}</p></div>`;
+            }).join('');
+
+            const storeBannerBox = document.getElementById('storefront-banner-container');
+            if(state.storefrontBanner) { document.getElementById('storefront-banner-img').src = state.storefrontBanner; storeBannerBox.classList.remove('hidden'); } else { storeBannerBox.classList.add('hidden'); }
+            const plusBannerBox = document.getElementById('plusone-banner-container');
+            if(state.plusoneBanner) { document.getElementById('plusone-banner-img').src = state.plusoneBanner; plusBannerBox.classList.remove('hidden'); } else { plusBannerBox.classList.add('hidden'); }
+            const qrBox = document.getElementById('qr-code-display-container');
+            if(state.qrCodeImg) { document.getElementById('qr-code-img-display').src = state.qrCodeImg; qrBox.classList.remove('hidden'); } else { qrBox.classList.add('hidden'); }
+
+            renderStorefrontProducts(); renderPublicActiveOrders(); renderPublicReviews();
+
+            document.getElementById('display-current-queue').textContent = formatQ(state.currentQueue);
+            const waitingQs = state.queues.filter(q => q.status === 'wait');
+            let waitingText = '-';
+            if(waitingQs.length > 0) {
+                if(waitingQs.length === 1) waitingText = formatQ(waitingQs[0].number) + ' ';
+                else waitingText = `${formatQ(waitingQs[0].number)} — ${formatQ(waitingQs[waitingQs.length-1].number)} 🍓`;
+            }
+            document.getElementById('display-waiting-queues').textContent = waitingText;
+            
+            if(state.isAdminLoggedIn) {
+                document.getElementById('admin-logo-img').src = state.shopLogo;
+                document.getElementById('admin-stat-plus').textContent = state.plusOneCount.toLocaleString();
+                document.getElementById('admin-stat-reviews').textContent = state.reviews.length;
+                document.getElementById('admin-shop-tagline').value = state.shopTagline;
+                document.getElementById('admin-recommended-text').value = state.recommendedText;
+                document.getElementById('admin-promotion-text').value = state.promotionText;
+                document.getElementById('admin-howto-text').value = state.howtoText;
+                document.getElementById('admin-current-q-input').value = formatQ(state.currentQueue);
+                
+                if(state.storefrontBanner) { document.getElementById('store-banner-preview-img').src = state.storefrontBanner; document.getElementById('store-banner-preview-box').classList.remove('hidden'); document.getElementById('btn-remove-store-banner').classList.remove('hidden'); }
+                if(state.plusoneBanner) { document.getElementById('plusone-banner-preview-img').src = state.plusoneBanner; document.getElementById('plusone-banner-preview-box').classList.remove('hidden'); document.getElementById('btn-remove-plusone-banner').classList.remove('hidden'); }
+                if(state.qrCodeImg) { document.getElementById('qr-preview-img').src = state.qrCodeImg; document.getElementById('qr-preview-box').classList.remove('hidden'); document.getElementById('btn-remove-qr').classList.remove('hidden'); }
+
+                renderAdminQueues(); renderAdminReviews(); renderAdminProducts();
+            }
+        }
+
+        function renderStorefrontProducts() {
+            const games = state.products.filter(p => p.type === 'game');
+            const apps = state.products.filter(p => p.type === 'app');
+            const iphones = state.products.filter(p => p.type === 'iphone'); 
+            
+            const gContainer = document.getElementById('dynamic-games-container');
+            const aContainer = document.getElementById('dynamic-apps-container');
+            const iContainer = document.getElementById('dynamic-iphone-container');
+
+            if(iphones.length === 0) { iContainer.innerHTML = '<div class="col-span-1 sm:col-span-2 flex flex-col items-center justify-center text-thimble/60 py-6 bg-white/50 rounded-2xl"><i class="fa-brands fa-apple text-3xl mb-1 animate-pulse"></i><p class="text-xs font-bold">รอแอดมินยัยชบาเพิ่มรายการไอโฟนอยู่น้า~</p></div>'; } 
+            else { iContainer.innerHTML = iphones.map(p => { const bgClr = p.bg_color || 'lavender'; const badgeHtml = p.badge ? `<div class="absolute top-0 right-0 bg-${bgClr} text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-xl z-10 shadow-sm">${escapeHtml(p.badge)}</div>` : ''; return `<div onclick="showProductRates('${p.id}')" class="bg-white/95 rounded-2xl p-3 flex items-center gap-3 cursor-pointer group shadow-sm hover:shadow-md transition-all hover:-translate-y-1 relative overflow-hidden border border-${bgClr}/30">${badgeHtml}<div class="w-14 h-14 rounded-xl bg-${bgClr}/20 text-${bgClr} flex items-center justify-center text-2xl font-bold group-hover:scale-110 transition-transform shadow-sm border border-${bgClr} shrink-0 overflow-hidden">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" class="w-full h-full object-cover">` : '<i class="fa-brands fa-apple"></i>'}</div><div class="flex-1 min-w-0 pr-2"><h4 class="font-bold text-arcavia text-sm whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(p.name)}</h4><p class="text-xs text-strawberry font-bold mt-0.5">${escapeHtml(p.price_text)}</p></div></div>`; }).join(''); }
+
+            if(games.length === 0) { gContainer.innerHTML = '<div class="col-span-2 sm:col-span-3 flex flex-col items-center justify-center text-thimble/60 py-8 bg-white/50 rounded-2xl"><i class="fa-solid fa-gamepad text-4xl mb-2 animate-pulse"></i><p class="text-sm font-bold">รอแอดมินยัยชบาเพิ่มเรทราคาเกมอยู่น้า~</p></div>'; } 
+            else { gContainer.innerHTML = games.map(g => { const bgClr = g.bg_color || 'babyblue'; const badgeHtml = g.badge ? `<div class="absolute top-0 right-0 bg-${bgClr} text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-xl z-10 shadow-sm">${escapeHtml(g.badge)}</div>` : ''; const imgHtml = g.image_url ? `<img src="${escapeHtml(g.image_url)}" alt="${escapeHtml(g.name)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">` : `<div class="font-bold text-gray-400 text-xs">NO IMG</div>`; return `<div onclick="showProductRates('${g.id}')" class="item-card bg-white rounded-2xl p-3 relative overflow-hidden text-center group shadow-sm hover:shadow-md transition-all">${badgeHtml}<div class="w-full aspect-square rounded-xl bg-${bgClr}/10 flex items-center justify-center mb-2 overflow-hidden border border-${bgClr}/20">${imgHtml}</div><h4 class="font-bold text-arcavia text-sm mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis px-1">${escapeHtml(g.name)}</h4><p class="text-[10px] text-thimble font-medium mb-3">${escapeHtml(g.price_text)}</p><button class="w-full bg-gradient-to-r from-${bgClr} to-${bgClr}/80 text-white py-1.5 rounded-lg text-xs font-bold shadow-sm group-hover:opacity-90 transition-all pointer-events-none">เลือกแพ็กเกจ ✨</button></div>`; }).join(''); }
+
+            if(apps.length === 0) { aContainer.innerHTML = '<div class="col-span-1 sm:col-span-2 flex flex-col items-center justify-center text-thimble/60 py-8 bg-white/50 rounded-2xl"><i class="fa-solid fa-mobile-screen text-4xl mb-2 animate-pulse"></i><p class="text-sm font-bold">รอแอดมินยัยชบาเพิ่มเรทราคาแอพอยู่น้า~</p></div>'; } 
+            else { aContainer.innerHTML = apps.map(a => { const bgClr = a.bg_color || 'blush'; const badgeTxt = a.badge ? a.badge.charAt(0).toUpperCase() : a.name.charAt(0); return `<div class="bg-white/90 backdrop-blur rounded-2xl p-3 flex items-center gap-3 cursor-pointer group shadow-sm hover:shadow-md transition-all hover:-translate-y-1" onclick="showProductRates('${a.id}')"><div class="w-12 h-12 rounded-xl bg-${bgClr} text-white flex items-center justify-center text-xl font-bold group-hover:scale-110 transition-transform shadow-sm border border-${bgClr} shrink-0 overflow-hidden">${a.image_url ? `<img src="${escapeHtml(a.image_url)}" class="w-full h-full object-cover">` : badgeTxt}</div><div class="flex-1 min-w-0"><h4 class="font-bold text-arcavia text-sm whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(a.name)}</h4><p class="text-[11px] text-thimble font-medium">${escapeHtml(a.price_text)}</p></div><div class="shrink-0 text-${bgClr} font-bold text-xs bg-${bgClr}/10 px-2 py-1 rounded-lg">เลือก ✨</div></div>`; }).join(''); }
+        }
+
+        function renderPublicActiveOrders() {
+            const container = document.getElementById('public-active-orders-list');
+            const activeQs = state.queues.filter(q => q.status === 'wait' || q.status === 'processing').sort((a,b)=>a.id - b.id);
+            if(activeQs.length === 0) { container.innerHTML = '<p class="text-center py-8 text-thimble font-medium bg-white/50 rounded-2xl border border-blush">ไม่มีออเดอร์ค้างน้า 🎀</p>'; return; }
+            container.innerHTML = activeQs.map(q => {
+                const conf = statusConfig[q.status]; const itemName = q.item_name ? escapeHtml(q.item_name) : 'ไม่ได้ระบุสินค้า'; const pkgName = q.package_name ? escapeHtml(q.package_name) : ''; const priceText = q.price ? `ยอดรวม: <b>${escapeHtml(q.price)}</b>` : '';
+                return `<div class="bg-white/90 rounded-2xl p-4 border border-precious shadow-sm relative overflow-hidden"><div class="absolute left-0 top-0 bottom-0 w-2 ${conf.bg}"></div><div class="flex justify-between items-start pl-3"><div><div class="flex items-center gap-2 mb-1"><h4 class="font-bold text-arcavia text-base">${formatQ(q.number)}</h4><span class="${conf.bg} ${conf.color} text-[10px] font-bold px-2 py-0.5 rounded-full border ${conf.border}">${conf.label}</span></div><p class="text-sm font-bold text-strawberry">${itemName}</p>${pkgName ? `<p class="text-xs text-thimble mt-0.5"><i class="fa-solid fa-box-open opacity-50"></i> ${pkgName}</p>` : ''}</div><div class="text-right">${priceText ? `<p class="text-xs text-arcavia bg-blush/30 px-2 py-1 rounded-lg inline-block">${priceText}</p>` : ''}<p class="text-[10px] text-gray-400 mt-1">${new Date(q.created_at).toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'})}</p></div></div></div>`;
+            }).join('');
+        }
+
+        function showProductRates(id) {
+            const p = state.products.find(x => String(x.id) === String(id));
+            if(!p) return;
+            state.currentProduct = p; state.selectedPackage = null;
+            document.getElementById('summary-pkg-name').textContent = 'ยังไม่ได้เลือกแพ็กเกจ';
+            document.getElementById('summary-pkg-price').textContent = '฿0.00';
+            document.getElementById('btn-confirm-order').disabled = true;
+            document.getElementById('detail-name').textContent = p.name;
+            const badgeEl = document.getElementById('detail-badge');
+            if(p.badge) { badgeEl.textContent = p.badge; badgeEl.classList.remove('hidden'); } else { badgeEl.classList.add('hidden'); }
+            const taglineEl = document.getElementById('detail-tagline');
+            if(p.type === 'iphone') { taglineEl.innerHTML = '<i class="fa-solid fa-apple-whole text-peach"></i> สินค้าของแท้ มีประกัน'; } else { taglineEl.innerHTML = '<i class="fa-solid fa-bolt text-peach"></i> รวดเร็ว ปลอดภัย ราคาดี'; }
+            const imgEl = document.getElementById('detail-img'); const iconEl = document.getElementById('detail-icon-fallback');
+            if(p.image_url) { imgEl.src = p.image_url; imgEl.classList.remove('hidden'); iconEl.classList.add('hidden'); } else { imgEl.classList.add('hidden'); iconEl.classList.remove('hidden'); iconEl.textContent = p.name.charAt(0); }
+
+            const gridContainer = document.getElementById('detail-packages-grid');
+            if (!p.rates_detail || p.rates_detail.trim() === '') { gridContainer.innerHTML = `<div class="col-span-2 sm:col-span-3 text-center bg-blush/20 p-4 rounded-xl border border-blush text-sm font-medium text-arcavia shadow-inner">แอดมินยังไม่ได้ลงรายละเอียดเรทราคาน้า<br>ทักไลน์สอบถามได้เลยค่า 🍓</div>`; } 
+            else {
+                const lines = p.rates_detail.split('\n').filter(line => line.trim() !== '');
+                const htmlList = lines.map((line, index) => {
+                    let parts = line.split(/=| - /);
+                    let nameStr = '', priceStr = '';
+                    if (parts.length >= 2) { nameStr = parts[0].trim(); priceStr = parts.slice(1).join('=').trim(); } 
+                    else { nameStr = line.trim(); priceStr = ''; }
+                    let iconHtml = '<i class="fa-solid fa-gem text-babyblue text-xl mb-1 drop-shadow-sm group-hover:scale-110 transition-transform"></i>';
+                    if (p.type === 'app') iconHtml = '<i class="fa-solid fa-ticket text-lavender text-xl mb-1 drop-shadow-sm group-hover:scale-110 transition-transform"></i>';
+                    if (p.type === 'iphone') iconHtml = '<i class="fa-solid fa-mobile text-gray-300 text-xl mb-1 drop-shadow-sm group-hover:scale-110 transition-transform"></i>';
+                    let displayPrice = priceStr ? `<p class="font-bold text-strawberry text-sm mt-auto">${escapeHtml(priceStr)}</p>` : '';
+                    return `<div id="pkg-card-${index}" onclick="selectPackage(${index}, '${escapeHtml(nameStr)}', '${escapeHtml(priceStr)}')" class="pkg-card bg-white border-2 border-precious rounded-2xl p-3 cursor-pointer hover:border-strawberry transition-all flex flex-col justify-center items-center text-center shadow-sm relative group overflow-hidden min-h-[96px] h-auto py-4"><div class="absolute inset-0 bg-strawberry opacity-0 group-hover:opacity-5 transition-opacity pointer-events-none"></div>${iconHtml}<h5 class="font-bold text-arcavia text-xs w-full px-1 ${priceStr ? 'mb-1' : 'my-auto'} leading-snug">${escapeHtml(nameStr)}</h5>${displayPrice}<div id="pkg-check-${index}" class="hidden absolute top-1 right-1 bg-strawberry text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-check"></i></div></div>`;
+                }).join('');
+                gridContainer.innerHTML = htmlList;
+            }
+            navigateTo('view-product-detail');
+        }
+
+        function selectPackage(index, name, price) {
+            let finalPrice = price;
+            if (!finalPrice || finalPrice === '') {
+                const match = name.match(/(\d+(?:,\d+)*)\s*(บาท|บูด|B|b|฿|bath|baht|\.-)?$/i);
+                if (match) { finalPrice = match[0].trim(); } else { finalPrice = name; }
+            }
+            state.selectedPackage = { name, price: finalPrice };
+            document.querySelectorAll('.pkg-card').forEach(el => { el.classList.remove('border-strawberry', 'bg-blush/20', 'scale-105', 'shadow-md'); el.classList.add('border-precious', 'bg-white'); });
+            document.querySelectorAll('[id^="pkg-check-"]').forEach(el => el.classList.add('hidden'));
+            const selectedCard = document.getElementById(`pkg-card-${index}`);
+            if(selectedCard) { selectedCard.classList.remove('border-precious', 'bg-white'); selectedCard.classList.add('border-strawberry', 'bg-blush/20', 'scale-105', 'shadow-md'); document.getElementById(`pkg-check-${index}`).classList.remove('hidden'); }
+            document.getElementById('summary-pkg-name').textContent = name;
+            document.getElementById('summary-pkg-price').textContent = finalPrice;
+            document.getElementById('btn-confirm-order').disabled = false;
+        }
+
+        function confirmOrderLine() { if(!state.selectedPackage || !state.currentProduct) return; let text = `สนใจสั่งซื้อ: ${state.currentProduct.name}\nแพ็กเกจ: ${state.selectedPackage.name}\nราคา: ${state.selectedPackage.price}`; let encodedText = encodeURIComponent(text); window.open('https://lin.ee/dmlNukC?text=' + encodedText, '_blank'); }
+
+        const formatQ = (num) => '#' + String(num).replace('#', '').trim();
+        const cleanQ = (num) => String(num).replace('#', '').trim();
+        function escapeHtml(unsafe) { return (unsafe || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        function showToast(message, type = 'success') { const container = document.getElementById('toast-container'); const toast = document.createElement('div'); const colors = type === 'success' ? 'bg-green-500 text-white' : (type === 'error' ? 'bg-arcavia text-white' : 'bg-peach text-white'); toast.className = `${colors} px-4 py-3 rounded-2xl shadow-lg text-sm font-bold transform transition-all duration-300 translate-y-4 opacity-0 flex items-center gap-2 border-2 border-white/20 z-[100]`; toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i> ${message}`; container.appendChild(toast); requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0')); setTimeout(() => { toast.classList.add('opacity-0', '-translate-y-2'); setTimeout(() => toast.remove(), 300); }, 3000); }
+        function openModal(title, message, icon = '', actionsHtml = null, isHtml = false) { document.getElementById('modal-title').textContent = title; if (isHtml) { document.getElementById('modal-message').innerHTML = message; } else { document.getElementById('modal-message').textContent = message; } document.getElementById('modal-icon').innerHTML = icon; if(actionsHtml) { document.getElementById('modal-actions').innerHTML = actionsHtml; document.getElementById('modal-actions').classList.add('flex-col'); } else { document.getElementById('modal-actions').innerHTML = `<button onclick="closeModal()" class="px-6 py-2.5 bg-blush rounded-full text-strawberry font-bold hover:bg-precious hover:text-white transition-colors shadow-sm w-full">เข้าใจแล้วค่า</button>`; document.getElementById('modal-actions').classList.remove('flex-col'); } const modal = document.getElementById('custom-modal'); const content = document.getElementById('modal-content'); modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('scale-95'); content.classList.add('scale-100'); }, 10); }
+        function closeModal() { const modal = document.getElementById('custom-modal'); const content = document.getElementById('modal-content'); content.classList.remove('scale-100'); content.classList.add('scale-95'); setTimeout(() => modal.classList.add('hidden'), 200); }
+
+        function checkMyQueue() {
+            let input = cleanQ(document.getElementById('input-check-queue').value);
+            if(!input) return openModal('กรอกเลขคิวหน่อยน้า', 'เบ้บลืมกรอกเลขคิวหรือเปล่าคะ?\nลองเช็กในบิลดูน้า', '');
+            const q = state.queues.find(q => cleanQ(q.number) === input);
+            const resBox = document.getElementById('queue-result-box');
+            if(!q) { resBox.classList.add('hidden'); return openModal('ไม่พบเลขคิวนี้ค่า', `หาคิวเบอร์ #${input} ไม่เจอเลยค่ะ\nลองตรวจสอบตัวเลขอีกครั้งนะค้า`, ''); }
+
+            let remainingText = '-';
+            const remContainer = document.getElementById('res-remaining-container');
+            if(q.status === 'wait') {
+                const waitingList = state.queues.filter(x => x.status === 'wait' || x.status === 'processing').sort((a,b)=>a.id - b.id);
+                const currIndex = waitingList.findIndex(x => cleanQ(x.number) === cleanQ(state.currentQueue));
+                const myIndex = waitingList.findIndex(x => cleanQ(x.number) === cleanQ(q.number));
+                if(myIndex > currIndex && currIndex !== -1) { remainingText = `${myIndex - currIndex} คิว`; remContainer.classList.remove('hidden'); } 
+                else if(myIndex !== -1 && currIndex === -1) { remainingText = `${myIndex + 1} คิว`; remContainer.classList.remove('hidden'); } 
+                else { remContainer.classList.add('hidden'); }
+            } else { remContainer.classList.add('hidden'); }
+
+            document.getElementById('res-queue-num').innerHTML = `<span>🧸 คิวของเบ้บ ${formatQ(q.number)}</span>`;
+            document.getElementById('res-current-q').textContent = formatQ(state.currentQueue);
+            document.getElementById('res-remaining-q').textContent = remainingText;
+            document.getElementById('res-cute-msg').innerHTML = escapeHtml(statusConfig[q.status].msg).replace(/\n/g, '<br>');
+            
+            const orderBox = document.getElementById('res-order-details');
+            if(q.item_name || q.package_name || q.price) {
+                orderBox.innerHTML = `<div class="order-card-detail"><p class="text-[10px] text-thimble font-bold mb-1">รายละเอียดออเดอร์</p>${q.item_name ? `<p class="text-sm font-bold text-arcavia">${escapeHtml(q.item_name)}</p>` : ''}${q.package_name ? `<p class="text-xs text-thimble mt-1"><i class="fa-solid fa-box-open opacity-50"></i> ${escapeHtml(q.package_name)}</p>` : ''}${q.price ? `<p class="text-xs font-bold text-strawberry mt-1.5 bg-white inline-block px-2 py-0.5 rounded shadow-sm">ยอด: ${escapeHtml(q.price)}</p>` : ''}</div>`;
+                orderBox.classList.remove('hidden');
+            } else { orderBox.classList.add('hidden'); orderBox.innerHTML = ''; }
+
+            updateStepperUI(q.status);
+            resBox.classList.remove('hidden'); resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function updateStepperUI(status) {
+            const progress = document.getElementById('stepper-progress'); const steps = ['wait', 'processing', 'completed'];
+            const actCls = 'bg-strawberry border-strawberry text-white shadow-md shadow-strawberry/40 scale-110'; const passCls = 'bg-precious border-precious text-white'; const futCls = 'bg-white border-blush text-precious'; const issCls = 'bg-arcavia border-arcavia text-white animate-pulse scale-110 shadow-md shadow-arcavia/40';
+            steps.forEach(s => document.getElementById(`step-icon-${s}`).className = `w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-300 border-2 ${futCls}`);
+            if (status === 'issue') { progress.style.width = '100%'; progress.className = 'absolute top-4 left-4 h-1.5 bg-arcavia z-0 rounded-full transition-all duration-500 ease-in-out'; steps.forEach(s => { const el = document.getElementById(`step-icon-${s}`); el.className = `w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-300 border-2 ${issCls}`; el.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xs"></i>'; }); return; } 
+            else { progress.className = 'absolute top-4 left-4 h-1.5 bg-strawberry z-0 rounded-full transition-all duration-500 ease-in-out'; document.getElementById('step-icon-wait').innerHTML = '<i class="fa-solid fa-clipboard-list text-xs"></i>'; document.getElementById('step-icon-processing').innerHTML = '<i class="fa-solid fa-fire-burner text-xs"></i>'; document.getElementById('step-icon-completed').innerHTML = '<i class="fa-solid fa-box-open text-xs"></i>'; }
+            let pWidth = '0%'; let curIdx = 0; if (status === 'processing') { pWidth = '50%'; curIdx = 1; } if (status === 'completed') { pWidth = '100%'; curIdx = 2; } progress.style.width = pWidth;
+            steps.forEach((s, i) => { const el = document.getElementById(`step-icon-${s}`); if (i < curIdx) el.className = `w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-300 border-2 ${passCls}`; else if (i === curIdx) el.className = `w-8 h-8 rounded-full flex items-center justify-center z-10 transition-all duration-300 border-2 ${actCls}`; });
+        }
+
+        async function givePlusOne(btn) { btn.disabled = true; try { await supaClient.rpc('increment_plus_one'); state.plusOneCount++; document.getElementById('display-plus-one').textContent = state.plusOneCount.toLocaleString(); const msgObj = document.getElementById('plus-one-thank-you'); msgObj.textContent = `⋆.𐙚 ̊แงง ขอบคุณเบ้บมากนะค้าา\nเครดิตของยัยชบาเพิ่มเป็น ${state.plusOneCount.toLocaleString()} แล้วค่าา ᯓ⋆ 𐙚 ̊\nขอบคุณที่เอ็นดูร้านเล็ก ๆ ของยัยชบาน้าบ🪞✨`; msgObj.classList.remove('hidden'); msgObj.classList.add('fade-in'); showToast('ส่ง Plus One สำเร็จ! กดเพิ่มได้เรื่อยๆ เลยน้า 🍓', 'success'); if(state.isAdminLoggedIn) updateAllViews(); } catch(e) { showToast('ส่งหัวใจไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        function initStarRating() { const stars = document.querySelectorAll('#review-stars-input i'); const hiddenInput = document.getElementById('review-rating'); stars.forEach(star => { star.addEventListener('click', (e) => { const rating = e.target.getAttribute('data-rating'); hiddenInput.value = rating; stars.forEach(s => { if(s.getAttribute('data-rating') <= rating) { s.classList.add('active'); s.classList.remove('text-blush'); } else { s.classList.remove('active'); s.classList.add('text-blush'); } }); }); }); if(stars.length > 0) stars[4].click(); }
+        async function uploadImageToStorage(file, folder) { const fileName = `${folder}/${Date.now()}.${file.name.split('.').pop()}`; await supaClient.storage.from('images').upload(fileName, file, { cacheControl: '3600', upsert: false }); return supaClient.storage.from('images').getPublicUrl(fileName).data.publicUrl; }
+        async function handleImagePreview(event) { const file = event.target.files[0]; if (!file) return; showToast('กำลังเตรียมรูปภาพ...', 'info'); try { state.compressedImgBase64 = await uploadImageToStorage(file, 'reviews'); document.getElementById('review-img-preview').src = state.compressedImgBase64; document.getElementById('review-img-preview-container').classList.remove('hidden'); document.getElementById('btn-remove-review-img').classList.remove('hidden'); showToast('เตรียมรูปภาพสำเร็จ', 'success'); } catch(e){ showToast('อัปโหลดรูปล้มเหลว', 'error'); } }
+        function removePreviewImage() { state.compressedImgBase64 = null; document.getElementById('review-img-preview-container').classList.add('hidden'); document.getElementById('btn-remove-review-img').classList.add('hidden'); document.getElementById('review-image').value = ''; }
+        async function submitReview(btn) { const name = document.getElementById('review-name').value.trim(); const text = document.getElementById('review-text').value.trim(); if(!name || !text) return openModal('ข้อมูลไม่ครบค่า', 'เบ้บรบกวนใส่ชื่อและข้อความรีวิวให้ยัยชบาหน่อยน้า', ''); btn.disabled = true; btn.innerHTML = 'กำลังส่ง...'; try { const newRev = { name, text, rating: parseInt(document.getElementById('review-rating').value), image: state.compressedImgBase64, status: 'pending' }; const { data } = await supaClient.from('reviews').insert([newRev]).select(); if(data && data.length > 0) state.reviews.unshift(data[0]); document.getElementById('review-name').value = ''; document.getElementById('review-text').value = ''; removePreviewImage(); openModal('ส่งรีวิวเรียบร้อยค่า!', '꒷꒦꒷꒦꒷꒦꒷꒦꒷꒦꒷꒦꒷꒷꒦꒷꒦꒷꒦꒷꒦꒷\n╰┈➤ขอบคุณสำหรับรีวิวของเบ้บนะค้าา\n➤ยัยชบาจะรอแอดมินอนุมัติน้า ᝰ.ᐟ', ''); updateAllViews(); } catch(e) { showToast('ส่งรีวิวไม่สำเร็จ', 'error'); } finally { btn.disabled = false; btn.innerHTML = 'ส่งรีวิว'; } }
+        function renderPublicReviews() { const container = document.getElementById('public-reviews-container'); const appvs = state.reviews.filter(r => r.status === 'approved'); if(appvs.length === 0) return container.innerHTML = `<p class="text-sm text-thimble text-center py-4 font-medium">ยังไม่มีรีวิวเลยค่า มาเป็นคนแรกกันน้า 🧸</p>`; const html = appvs.map(r => { let stars = ''; for(let i=1; i<=5; i++) stars += `<i class="fa-solid fa-star ${i <= r.rating ? 'text-peach' : 'text-blush'} text-xs"></i>`; let img = r.image ? `<img src="${escapeHtml(r.image)}" class="mt-3 rounded-xl max-h-48 w-auto object-contain border-2 border-blush shadow-sm relative z-10">` : ''; return `<div class="bg-white/95 p-4 rounded-2xl border-2 border-blush text-sm shadow-sm relative overflow-hidden backdrop-blur-sm"><div class="flex justify-between items-start mb-1 relative z-10"><div class="font-bold text-strawberry flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-blush text-arcavia text-xs flex items-center justify-center border border-precious shadow-sm">🍓</div>${escapeHtml(r.name)}</div><div class="flex gap-0.5">${stars}</div></div><p class="text-arcavia mt-2 pl-9 whitespace-pre-line font-medium leading-relaxed relative z-10">${escapeHtml(r.text)}</p>${img ? `<div class="pl-9 relative z-10">${img}</div>` : ''}</div>`; }).join(''); container.innerHTML = appvs.length >= 2 ? `<div class="review-carousel-container"><div class="review-carousel-track">${html}${html}</div></div>` : html; }
+
+        async function adminLogin(btn) { const email = document.getElementById('admin-email').value.trim(); const pwd = document.getElementById('admin-password').value; if(!email || !pwd) return showToast('แงง กรอกอีเมลและรหัสผ่านให้ครบนะค้า', 'error'); btn.disabled = true; btn.innerHTML = 'กำลังตรวจสอบ...'; try { await supaClient.auth.signInWithPassword({ email, password: pwd }); const { data: isAdmin } = await supaClient.rpc('is_admin'); if(!isAdmin) { await supaClient.auth.signOut(); throw new Error(); } state.isAdminLoggedIn = true; showToast('เข้าสู่ระบบสำเร็จ!', 'success'); await fetchDataFromSupabase(); navigateMain('view-admin'); } catch (err) { openModal('เข้าสู่ระบบล้มเหลว', 'แงง ลองเช็กอีเมลหรือรหัสผ่านอีกทีนะค้า', ''); } finally { btn.disabled = false; btn.innerHTML = 'เข้าสู่ระบบ'; } }
+        async function adminLogout(btn) { btn.disabled = true; await supaClient.auth.signOut(); state.isAdminLoggedIn = false; showToast('ออกจากระบบแล้วค่า', 'success'); navigateMain('view-storefront'); btn.disabled = false; }
+
+        async function updateShopSetting(column, value) { 
+            const { error } = await supaClient.from('shop_settings').update({ [column]: value }).eq('id', 1); 
+            if (error) throw error;
+        }
+        
+        async function adminUpdateTagline(btn) { const input = document.getElementById('admin-shop-tagline').value.trim(); if(!input) return showToast('กรุณากรอกคำโปรย', 'error'); btn.disabled = true; try { await updateShopSetting('shop_tagline', input); state.shopTagline = input; updateAllViews(); showToast('อัปเดตคำโปรยเรียบร้อย', 'success'); } catch(e) { showToast('อัปเดตไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        async function adminUpdatePromoAndRec(btn) { const rec = document.getElementById('admin-recommended-text').value.trim(); const promo = document.getElementById('admin-promotion-text').value.trim(); btn.disabled = true; try { await updateShopSetting('recommended_text', rec); await updateShopSetting('promotion_text', promo); state.recommendedText = rec; state.promotionText = promo; updateAllViews(); showToast('บันทึกสินค้าแนะนำและโปรโมชั่นสำเร็จ', 'success'); } catch(e) { showToast('บันทึกไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        async function adminUpdateHowTo(btn) { const howto = document.getElementById('admin-howto-text').value.trim(); btn.disabled = true; try { await updateShopSetting('howto_text', howto); state.howtoText = howto; updateAllViews(); showToast('บันทึกวิธีสั่งซื้อสำเร็จ', 'success'); } catch(e) { showToast('บันทึกไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        async function handleShopLogoUpload(event) { const file = event.target.files[0]; if (!file) return; showToast('กำลังอัปโหลด...', 'info'); try { const url = await uploadImageToStorage(file, 'logos'); await updateShopSetting('shop_logo', url); state.shopLogo = url; updateAllViews(); showToast('เปลี่ยนโลโก้เรียบร้อย', 'success'); } catch(e){ showToast('อัปโหลดล้มเหลว', 'error'); } }
+        async function handleStorefrontBannerUpload(event) { const file = event.target.files[0]; if (!file) return; showToast('กำลังอัปโหลดแบนเนอร์...', 'info'); try { const url = await uploadImageToStorage(file, 'banners'); await updateShopSetting('storefront_banner', url); state.storefrontBanner = url; updateAllViews(); showToast('อัปโหลดแบนเนอร์หน้าร้านสำเร็จ', 'success'); } catch(e){ showToast('อัปโหลดล้มเหลว', 'error'); } }
+        async function removeStorefrontBanner(btn) { btn.disabled = true; try { await updateShopSetting('storefront_banner', null); state.storefrontBanner = null; document.getElementById('store-banner-preview-box').classList.add('hidden'); document.getElementById('btn-remove-store-banner').classList.add('hidden'); updateAllViews(); showToast('ลบแบนเนอร์หน้าร้านแล้ว', 'success'); } catch(e) { showToast('ลบไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        async function handlePlusOneBannerUpload(event) { const file = event.target.files[0]; if (!file) return; showToast('กำลังอัปโหลดแบนเนอร์...', 'info'); try { const url = await uploadImageToStorage(file, 'banners'); await updateShopSetting('plusone_banner', url); state.plusoneBanner = url; updateAllViews(); showToast('อัปโหลดแบนเนอร์ Plus One สำเร็จ', 'success'); } catch(e){ showToast('อัปโหลดล้มเหลว', 'error'); } }
+        async function removePlusOneBanner(btn) { btn.disabled = true; try { await updateShopSetting('plusone_banner', null); state.plusoneBanner = null; document.getElementById('plusone-banner-preview-box').classList.add('hidden'); document.getElementById('btn-remove-plusone-banner').classList.add('hidden'); updateAllViews(); showToast('ลบแบนเนอร์ Plus One แล้ว', 'success'); } catch(e) { showToast('ลบไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        
+        async function handleQRCodeUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            showToast('กำลังอัปโหลด QR Code...', 'info');
+            try {
+                const url = await uploadImageToStorage(file, 'banners');
+                await updateShopSetting('qr_code_img', url);
+                state.qrCodeImg = url;
+                updateAllViews();
+                showToast('อัปโหลด QR Code สำเร็จ', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('อัปโหลดล้มเหลว กรุณาลองใหม่', 'error');
+            }
+        }
+        async function removeQRCode(btn) { btn.disabled = true; try { await updateShopSetting('qr_code_img', null); state.qrCodeImg = null; document.getElementById('qr-preview-box').classList.add('hidden'); document.getElementById('btn-remove-qr').classList.add('hidden'); updateAllViews(); showToast('ลบ QR Code แล้ว', 'success'); } catch(e) { showToast('ลบไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+
+        function renderAdminQueues() {
+            const listMng = document.getElementById('admin-active-orders-list'); const listHist = document.getElementById('admin-history-orders-list');
+            const activeQs = state.queues.filter(q => q.status !== 'completed').sort((a,b)=>a.id - b.id);
+            const historyQs = state.queues.filter(q => q.status === 'completed').sort((a,b)=>b.id - a.id);
+            if(activeQs.length === 0) listMng.innerHTML = `<p class="text-center py-4 text-thimble bg-white/50 rounded-2xl">ไม่มีออเดอร์ค้าง</p>`; else listMng.innerHTML = activeQs.map(q => renderOrderAdminCard(q)).join('');
+            if(historyQs.length === 0) listHist.innerHTML = `<p class="text-center py-4 text-thimble bg-white/50 rounded-2xl">ไม่มีประวัติ</p>`; else listHist.innerHTML = historyQs.map(q => renderOrderAdminCard(q, true)).join('');
+        }
+        function renderOrderAdminCard(q, isHistory = false) {
+            const isCurrent = cleanQ(q.number) === cleanQ(state.currentQueue) && !isHistory;
+            const borderCls = isCurrent ? 'border-peach' : 'border-blush'; const bgCls = isCurrent ? 'bg-peach/10' : 'bg-white/90';
+            return `<div class="${bgCls} border-2 ${borderCls} rounded-2xl p-4 shadow-sm flex flex-col gap-2 relative overflow-hidden transition-colors">${isCurrent ? '<div class="absolute top-0 right-0 bg-peach text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold shadow-sm z-10"><i class="fa-solid fa-star animate-pulse"></i> คิวปัจจุบัน</div>' : ''}<div class="flex justify-between items-start z-10"><div class="flex items-center gap-2"><span class="bg-arcavia text-white text-xs px-2 py-1 rounded-lg font-bold">${formatQ(q.number)}</span>${q.price ? `<span class="bg-green-100 text-green-700 border border-green-300 text-xs px-2 py-0.5 rounded font-bold">${escapeHtml(q.price)}</span>` : ''}</div><select onchange="adminChangeQueueStatus(${q.id}, this.value, this)" class="text-xs font-bold bg-white border border-precious rounded-lg px-2 py-1 focus:outline-none focus:border-strawberry text-strawberry shadow-sm w-[110px]"><option value="wait" ${q.status==='wait'?'selected':''}>รอคิว</option><option value="processing" ${q.status==='processing'?'selected':''}>กำลังทำ</option><option value="completed" ${q.status==='completed'?'selected':''}>เสร็จสิ้น</option><option value="issue" ${q.status==='issue'?'selected':''}>มีปัญหา</option></select></div><div class="z-10 mt-1"><p class="text-sm font-bold text-arcavia">${q.item_name ? escapeHtml(q.item_name) : '<span class="text-thimble font-medium">ไม่ได้ระบุสินค้า</span>'}</p>${q.package_name ? `<p class="text-xs text-thimble font-medium flex items-center gap-1 mt-0.5"><i class="fa-solid fa-box-open opacity-60"></i> ${escapeHtml(q.package_name)}</p>` : ''}</div><div class="flex justify-between items-end border-t border-blush/60 pt-2 mt-1 z-10"><p class="text-[10px] text-thimble">${new Date(q.created_at).toLocaleString('th-TH')}</p><button onclick="adminDeleteQueue(${q.id})" class="text-arcavia hover:text-red-700 text-xs font-bold px-2 py-1 bg-white border border-blush rounded-lg shadow-sm">ลบออเดอร์</button></div></div>`;
+        }
+        async function adminAddQueueWithOrder(btn) { const num = cleanQ(document.getElementById('admin-new-q').value.trim()); const itemName = document.getElementById('admin-new-q-item').value.trim(); const pkgName = document.getElementById('admin-new-q-pkg').value.trim(); const price = document.getElementById('admin-new-q-price').value.trim(); if(!num) return showToast('กรอกเลขคิวด้วยนะค้า', 'error'); if(state.queues.some(q => cleanQ(q.number) === num)) return showToast('มีเลขคิวนี้ในระบบแล้วค่า', 'error'); btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...'; try { const payload = { number: num, status: 'wait' }; if(itemName) payload.item_name = itemName; if(pkgName) payload.package_name = pkgName; if(price) payload.price = price; const { data, error } = await supaClient.from('queues').insert([payload]).select(); if(error) throw error; if(data) state.queues.push(data[0]); document.getElementById('admin-new-q').value = ''; document.getElementById('admin-new-q-item').value = ''; document.getElementById('admin-new-q-pkg').value = ''; document.getElementById('admin-new-q-price').value = ''; showToast('เพิ่มออเดอร์และคิวใหม่สำเร็จ!', 'success'); updateAllViews(); } catch(e) { showToast('เพิ่มข้อมูลไม่สำเร็จ', 'error'); console.error(e); } finally { btn.disabled = false; btn.innerHTML = '+ บันทึกออเดอร์ & สร้างคิว'; } }
+        function adminDeleteQueue(id) { openModal('ยืนยันลบออเดอร์/คิว', 'แน่ใจหรือไม่ที่จะลบออเดอร์นี้?\nลบแล้วกู้คืนไม่ได้น้า', '', `<button onclick="executeAdminDeleteQueue(${id})" class="px-5 py-2 bg-arcavia rounded-full text-white font-bold hover:bg-red-800 transition-colors text-sm shadow-md">ลบเลย</button><button onclick="closeModal()" class="px-5 py-2 bg-blush rounded-full text-strawberry font-bold hover:bg-precious transition-colors text-sm border border-precious">ยกเลิก</button>`); }
+        async function executeAdminDeleteQueue(id) { closeModal(); await supaClient.from('queues').delete().eq('id', id); state.queues = state.queues.filter(q => q.id !== id); updateAllViews(); showToast('ลบออเดอร์เรียบร้อย', 'success'); }
+        async function adminChangeQueueStatus(id, newStatus, selectElem) { selectElem.disabled = true; await supaClient.from('queues').update({ status: newStatus }).eq('id', id); state.queues.find(x => x.id === id).status = newStatus; updateAllViews(); selectElem.disabled = false; }
+        async function adminSetCurrentQueue(btn) { const input = cleanQ(document.getElementById('admin-current-q-input').value); if(!input) return showToast('กรอกเลขคิว', 'error'); btn.disabled = true; await updateShopSetting('current_queue', input); state.currentQueue = input; const q = state.queues.find(x => cleanQ(x.number) === input); if(q && q.status === 'wait') { await supaClient.from('queues').update({ status: 'processing' }).eq('id', q.id); q.status = 'processing'; } updateAllViews(); btn.disabled = false; showToast('อัปเดตคิวปัจจุบันสำเร็จ', 'success'); }
+
+        function renderAdminReviews() { const container = document.getElementById('admin-review-list'); if(state.reviews.length === 0) return container.innerHTML = `<p class="text-center py-4 font-bold">ไม่มีรีวิว</p>`; container.innerHTML = state.reviews.map(r => { const isPending = r.status === 'pending'; return `<div class="border-2 ${isPending ? 'border-peach bg-blush/30' : 'border-blush bg-white/90'} rounded-2xl p-4 text-sm flex flex-col gap-3"><div class="flex justify-between items-center gap-2"><input type="text" id="admin-rev-name-${r.id}" value="${escapeHtml(r.name)}" class="font-bold bg-white border border-precious rounded-lg px-2 py-1 text-xs w-1/2"><div class="flex items-center gap-2"><span class="text-xs text-peach font-bold"><i class="fa-solid fa-star"></i> ${r.rating}</span> ${isPending ? `<span class="bg-peach text-white px-2 py-0.5 rounded text-[10px]">รออนุมัติ</span>` : `<span class="bg-green-500 text-white px-2 py-0.5 rounded text-[10px]">อนุมัติแล้ว</span>`}</div></div><textarea id="admin-rev-text-${r.id}" rows="2" class="text-thimble font-medium bg-white border border-precious rounded-xl p-2 text-xs w-full resize-none">${escapeHtml(r.text)}</textarea>${r.image ? `<img src="${escapeHtml(r.image)}" class="mt-3 rounded-xl object-contain h-24 w-auto border-2 border-blush shadow-sm">` : ''}<div class="flex justify-between items-center border-t-2 border-blush/60 pt-3"><button onclick="adminSaveReviewEdit(${r.id}, this)" class="bg-peach text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-thimble">บันทึกแก้ไข</button><div class="flex gap-2">${isPending ? `<button onclick="adminToggleReviewStatus(${r.id}, 'approved', this)" class="bg-green-50 text-green-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-green-200">อนุมัติ</button>` : `<button onclick="adminToggleReviewStatus(${r.id}, 'pending', this)" class="bg-blush text-thimble px-3 py-1.5 rounded-lg text-xs font-bold border border-precious">ซ่อน</button>`}<button onclick="adminDeleteReview(${r.id})" class="bg-white text-arcavia px-3 py-1.5 rounded-lg text-xs font-bold border border-precious">ลบ</button></div></div></div>`; }).join(''); }
+        async function adminSaveReviewEdit(id, btn) { const r = state.reviews.find(x => x.id === id); const name = document.getElementById(`admin-rev-name-${id}`).value.trim(); const text = document.getElementById(`admin-rev-text-${id}`).value.trim(); if(!name || !text) return; btn.disabled = true; await supaClient.from('reviews').update({ name, text }).eq('id', id); r.name = name; r.text = text; updateAllViews(); btn.disabled = false; showToast('บันทึกสำเร็จ'); }
+        async function adminToggleReviewStatus(id, newStatus, btn) { btn.disabled = true; await supaClient.from('reviews').update({ status: newStatus }).eq('id', id); state.reviews.find(x => x.id === id).status = newStatus; updateAllViews(); btn.disabled = false; }
+        function adminDeleteReview(id) { openModal('ยืนยันการลบรีวิว', 'ลบแล้วจะไม่สามารถกู้คืนได้นะคะ?', '', `<button onclick="executeAdminDeleteReview(${id})" class="px-5 py-2 bg-arcavia rounded-full text-white font-bold hover:bg-red-800 transition-colors text-sm shadow-md">ลบเลย</button><button onclick="closeModal()" class="px-5 py-2 bg-blush rounded-full text-strawberry font-bold hover:bg-precious transition-colors text-sm border border-precious">ยกเลิก</button>`); }
+        async function executeAdminDeleteReview(id) { closeModal(); await supaClient.from('reviews').delete().eq('id', id); state.reviews = state.reviews.filter(r => r.id !== id); updateAllViews(); }
+
+        function renderAdminProducts() { const container = document.getElementById('admin-products-list'); if(state.products.length === 0) return container.innerHTML = `<p class="text-center py-4 font-bold text-thimble">ไม่มีสินค้า</p>`; container.innerHTML = state.products.map(p => { let typeIcon = p.type === 'game' ? '🎮 เกม' : (p.type === 'iphone' ? '📱 iPhone' : '🍏 แอพ'); return `<div class="bg-white rounded-xl p-3 border border-blush shadow-sm flex gap-3 items-center"><div class="w-12 h-12 rounded-lg bg-${p.bg_color}/30 border border-${p.bg_color} flex-shrink-0 flex items-center justify-center overflow-hidden">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" class="w-full h-full object-cover">` : `<span class="text-xs font-bold text-${p.bg_color}">Img</span>`}</div><div class="flex-1"><div class="flex items-center gap-2 mb-0.5"><span class="text-[10px] font-bold bg-blush text-strawberry px-1.5 py-0.5 rounded">${typeIcon}</span><h5 class="font-bold text-arcavia text-sm">${escapeHtml(p.name)}</h5></div><p class="text-[10px] text-thimble font-medium mt-0.5">${escapeHtml(p.price_text)} ${p.badge ? `| <span class="text-strawberry font-bold">${escapeHtml(p.badge)}</span>` : ''}</p></div><div class="flex flex-col sm:flex-row gap-2"><button onclick="adminEditProduct('${p.id}')" class="text-xs font-bold text-white bg-peach px-3 py-1.5 rounded-lg shadow-sm">แก้ไข</button><button onclick="adminDeleteProduct('${p.id}')" class="text-xs font-bold text-arcavia bg-white border border-precious px-3 py-1.5 rounded-lg shadow-sm">ลบ</button></div></div>`; }).join(''); }
+        async function handleProductImgTemp(event) { const file = event.target.files[0]; if (!file) return; showToast('กำลังเตรียมรูปภาพ...', 'info'); try { const url = await uploadImageToStorage(file, 'products'); document.getElementById('prod-img-url-temp').value = url; document.getElementById('prod-img-preview').src = url; document.getElementById('prod-img-preview').classList.remove('hidden'); showToast('อัปโหลดรูปสำเร็จ', 'success'); } catch(e) { showToast('อัปโหลดล้มเหลว', 'error'); } }
+        function adminResetProductForm() { document.getElementById('prod-edit-id').value = ''; document.getElementById('prod-type').value = 'game'; document.getElementById('prod-name').value = ''; document.getElementById('prod-price').value = ''; document.getElementById('prod-badge').value = ''; document.getElementById('prod-color').value = 'babyblue'; document.getElementById('prod-img-upload').value = ''; document.getElementById('prod-img-url-temp').value = ''; document.getElementById('prod-rates-detail').value = ''; document.getElementById('prod-img-preview').src = ''; document.getElementById('prod-img-preview').classList.add('hidden'); document.getElementById('product-form-title').innerHTML = '+ เพิ่มสินค้าใหม่'; }
+        function adminEditProduct(id) { const p = state.products.find(x => String(x.id) === String(id)); if(!p) return; document.getElementById('prod-edit-id').value = p.id; document.getElementById('prod-type').value = p.type; document.getElementById('prod-name').value = p.name; document.getElementById('prod-price').value = p.price_text; document.getElementById('prod-badge').value = p.badge || ''; document.getElementById('prod-color').value = p.bg_color || 'babyblue'; document.getElementById('prod-img-url-temp').value = p.image_url || ''; document.getElementById('prod-rates-detail').value = p.rates_detail || ''; if(p.image_url) { document.getElementById('prod-img-preview').src = p.image_url; document.getElementById('prod-img-preview').classList.remove('hidden'); } else { document.getElementById('prod-img-preview').classList.add('hidden'); } document.getElementById('product-form-title').innerHTML = `✎ แก้ไขสินค้า: ${p.name}`; window.scrollTo({ top: document.getElementById('product-form-title').offsetTop - 100, behavior: 'smooth' }); }
+        async function adminSaveProduct(btn) { const id = document.getElementById('prod-edit-id').value; const payload = { type: document.getElementById('prod-type').value, name: document.getElementById('prod-name').value.trim(), price_text: document.getElementById('prod-price').value.trim(), badge: document.getElementById('prod-badge').value.trim(), bg_color: document.getElementById('prod-color').value, image_url: document.getElementById('prod-img-url-temp').value, rates_detail: document.getElementById('prod-rates-detail').value.trim() }; if(!payload.name || !payload.price_text) return showToast('กรุณากรอกชื่อและเรทราคา', 'error'); btn.disabled = true; try { if(id) { const { error } = await supaClient.from('shop_products').update(payload).eq('id', id); if(error) throw error; const index = state.products.findIndex(x => String(x.id) === String(id)); state.products[index] = { ...state.products[index], ...payload }; showToast('แก้ไขข้อมูลสำเร็จ', 'success'); } else { const { data, error } = await supaClient.from('shop_products').insert([payload]).select(); if(error) throw error; if(data && data.length > 0) state.products.push(data[0]); showToast('เพิ่มสินค้าสำเร็จ', 'success'); } adminResetProductForm(); updateAllViews(); } catch(e) { console.error(e); showToast('บันทึกไม่สำเร็จ', 'error'); } finally { btn.disabled = false; } }
+        function adminDeleteProduct(id) { const actionHtml = `<button onclick="executeAdminDeleteProduct('${id}')" class="px-5 py-2 bg-arcavia rounded-full text-white font-bold hover:bg-red-800 transition-colors text-sm shadow-md">ลบเลย</button><button onclick="closeModal()" class="px-5 py-2 bg-blush rounded-full text-strawberry font-bold hover:bg-precious transition-colors text-sm border border-precious">ยกเลิก</button>`; openModal('ยืนยันการลบสินค้า', 'แน่ใจหรือไม่ที่จะลบสินค้านี้?', '', actionHtml); }
+        async function executeAdminDeleteProduct(id) { closeModal(); try { const { error } = await supaClient.from('shop_products').delete().eq('id', id); if(error) throw error; state.products = state.products.filter(p => String(p.id) !== String(id)); showToast('ลบสินค้าสำเร็จ', 'success'); updateAllViews(); } catch(e) { console.error(e); showToast('ลบไม่สำเร็จ', 'error'); } }
+    </script>
+</body>
+</html>
